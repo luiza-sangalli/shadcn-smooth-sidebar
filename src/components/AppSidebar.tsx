@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -24,6 +24,7 @@ export const AppSidebar = () => {
   const { user, logout } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<Array<{name: string, icon: any, path: string}>>([]);
 
   // Basic menu items available to all users
@@ -76,11 +77,11 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click with delayed navigation for admin route
+  // Handle menu item click with careful admin route handling
   const handleMenuItemClick = (path: string) => {
     console.log("Handling click for path:", path);
     
-    // Special handling for admin route to ensure permissions are checked
+    // Special handling for admin route
     if (path === '/admin') {
       if (!isAdmin) {
         toast({
@@ -91,16 +92,18 @@ export const AppSidebar = () => {
         return;
       }
       
-      // Use a slight delay to ensure all state is synced
       toast({
         title: "Acessando área administrativa",
         description: "Redirecionando para o painel administrativo...",
       });
+      
+      // Use navigate for admin path to avoid page refresh
+      navigate('/admin');
+      return;
     }
     
-    // Use window.location.href for a full page refresh
-    console.log("Navigating to:", path);
-    window.location.href = path;
+    // Use navigate for other paths
+    navigate(path);
   };
 
   return (

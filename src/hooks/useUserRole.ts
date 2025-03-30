@@ -39,14 +39,12 @@ export function useUserRole() {
   });
   
   useEffect(() => {
-    if (userRoles) {
+    if (!isLoading && userRoles) {
       const hasAdminRole = userRoles.some(r => r.role === "admin");
       console.log("Is admin determined:", hasAdminRole, "User roles:", userRoles);
       setIsAdmin(hasAdminRole);
-    } else {
-      setIsAdmin(false);
     }
-  }, [userRoles]);
+  }, [userRoles, isLoading]);
   
   return {
     isAdmin,
