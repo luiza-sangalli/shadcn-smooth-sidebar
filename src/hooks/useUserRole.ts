@@ -15,12 +15,19 @@ export function useUserRole() {
     queryFn: async () => {
       if (!isAuthenticated || !user?.id) return [];
       
+      console.log("Fetching roles for user:", user.id);
+      
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching user roles:", error);
+        throw error;
+      }
+      
+      console.log("User roles fetched:", data);
       return data || [];
     },
     enabled: !!user?.id && isAuthenticated,
@@ -28,7 +35,9 @@ export function useUserRole() {
   
   useEffect(() => {
     if (userRoles) {
-      setIsAdmin(userRoles.some(r => r.role === "admin"));
+      const hasAdminRole = userRoles.some(r => r.role === "admin");
+      console.log("Is admin:", hasAdminRole);
+      setIsAdmin(hasAdminRole);
     }
   }, [userRoles]);
   

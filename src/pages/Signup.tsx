@@ -17,12 +17,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Endereço de email inválido"),
+  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
+  confirmPassword: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "Senhas não coincidem",
   path: ["confirmPassword"],
 });
 
@@ -45,7 +45,7 @@ const Signup = () => {
       setError(null);
       await signup(values.name, values.email, values.password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      setError(err instanceof Error ? err.message : "Falha no registro");
     }
   };
 
@@ -53,9 +53,9 @@ const Signup = () => {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="auth-form-container">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold">Create an account</h1>
+          <h1 className="text-2xl font-bold">Criar uma conta</h1>
           <p className="text-muted-foreground">
-            Enter your information to get started
+            Insira suas informações para começar
           </p>
         </div>
 
@@ -146,19 +146,19 @@ const Signup = () => {
               {isLoading ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></span>
-                  Creating account...
+                  Criando conta...
                 </>
               ) : (
-                "Create account"
+                "Criar conta"
               )}
             </Button>
           </form>
         </Form>
 
         <div className="mt-6 text-center text-sm">
-          Already have an account?{" "}
+          Já tem uma conta?{" "}
           <Link to="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            Faça login
           </Link>
         </div>
       </div>
