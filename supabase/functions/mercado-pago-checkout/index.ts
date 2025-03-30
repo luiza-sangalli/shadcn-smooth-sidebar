@@ -20,6 +20,8 @@ const handleCors = (req: Request) => {
 };
 
 serve(async (req: Request) => {
+  console.log("Edge function received request:", req.method, req.url);
+  
   // Handle CORS
   const corsResponse = handleCors(req);
   if (corsResponse) {
@@ -40,6 +42,7 @@ serve(async (req: Request) => {
 
     // Validate required fields
     if (!courseId || !courseTitle || !coursePrice) {
+      console.error("Missing required fields:", { courseId, courseTitle, coursePrice });
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
@@ -49,6 +52,8 @@ serve(async (req: Request) => {
     // Mercado Pago API to create a preference
     const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
     const mercadoPagoAccessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
+
+    console.log("Using access token configured:", mercadoPagoAccessToken ? "Token is set" : "Token is NOT set");
 
     if (!mercadoPagoAccessToken) {
       console.error('MERCADO_PAGO_ACCESS_TOKEN not configured');
@@ -61,6 +66,7 @@ serve(async (req: Request) => {
     // Get authorization from request
     const authorization = req.headers.get('Authorization');
     if (!authorization) {
+      console.error('No authorization header provided');
       return new Response(JSON.stringify({ error: 'No authorization header' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
@@ -75,6 +81,7 @@ serve(async (req: Request) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase configuration missing');
       return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
@@ -96,59 +103,79 @@ serve(async (req: Request) => {
       });
     }
 
-    // Create the preference in Mercado Pago
-    const response = await fetch(mercadoPagoUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${mercadoPagoAccessToken}`
-      },
-      body: JSON.stringify({
-        items: [
-          {
-            id: courseId,
-            title: courseTitle,
-            description: `Acesso ao curso: ${courseTitle}`,
-            quantity: 1,
-            currency_id: 'BRL',
-            unit_price: Number(coursePrice)
-          }
-        ],
-        payer: {
-          email: user.email
-        },
-        back_urls: {
-          success: `${backUrl}/dashboard?status=approved&course_id=${courseId}`,
-          failure: `${backUrl}/course/${courseId}?status=rejected`,
-          pending: `${backUrl}/course/${courseId}?status=pending`
-        },
-        auto_return: 'approved',
-        external_reference: `${user.id}|${courseId}`,
-        notification_url: `${backUrl}/api/mercado-pago-webhook` // This will be implemented later
-      })
-    });
+    console.log("Creating preference for user:", user.email);
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Error creating preference:', errorData);
-      return new Response(JSON.stringify({ error: 'Failed to create payment preference' }), {
+    // Create the preference in Mercado Pago
+    try {
+      const response = await fetch(mercadoPagoUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${mercadoPagoAccessToken}`
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: courseId,
+              title: courseTitle,
+              description: `Acesso ao curso: ${courseTitle}`,
+              quantity: 1,
+              currency_id: 'BRL',
+              unit_price: Number(coursePrice)
+            }
+          ],
+          payer: {
+            email: user.email
+          },
+          back_urls: {
+            success: `${backUrl}/dashboard?status=approved&course_id=${courseId}`,
+            failure: `${backUrl}/course/${courseId}?status=rejected`,
+            pending: `${backUrl}/course/${courseId}?status=pending`
+          },
+          auto_return: 'approved',
+          external_reference: `${user.id}|${courseId}`,
+          notification_url: `${backUrl}/api/mercado-pago-webhook` // This will be implemented later
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response from Mercado Pago:', response.status, errorText);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to create payment preference',
+          details: errorText
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
+
+      const data = await response.json();
+      console.log("Preference created successfully:", data.id);
+
+      return new Response(JSON.stringify({ 
+        preferenceId: data.id,
+        initPoint: data.init_point
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    } catch (fetchError) {
+      console.error('Error fetching from Mercado Pago:', fetchError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to connect to payment provider',
+        details: fetchError.message 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       });
     }
-
-    const data = await response.json();
-
-    return new Response(JSON.stringify({ 
-      preferenceId: data.id,
-      initPoint: data.init_point
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
   } catch (error) {
     console.error('Error processing request:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error.message
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

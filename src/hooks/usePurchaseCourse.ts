@@ -25,6 +25,8 @@ export function usePurchaseCourse() {
       // Get the current URL origin (for back_urls)
       const backUrl = window.location.origin;
 
+      console.log("Iniciando pagamento para curso:", courseId, courseTitle, coursePrice);
+
       // Call the Mercado Pago Edge Function
       const { data, error } = await supabase.functions.invoke('mercado-pago-checkout', {
         body: { 
@@ -45,6 +47,7 @@ export function usePurchaseCourse() {
         return null;
       }
       
+      console.log("Resposta do servidor de pagamento:", data);
       return data.initPoint;
     } catch (error) {
       console.error('Error purchasing course:', error);
