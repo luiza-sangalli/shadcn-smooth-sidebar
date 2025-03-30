@@ -44,7 +44,7 @@ export function useUserRole() {
     enabled: !!user?.id && isAuthenticated,
     refetchOnWindowFocus: false,
     staleTime: 0, // No stale time to ensure fresh data every refetch
-    cacheTime: 5000, // Short cache time
+    gcTime: 5000, // Short cache time before garbage collection (replaces cacheTime)
   });
   
   // Force a refetch with stronger cache busting
