@@ -15,10 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
+import { LockKeyhole, Mail } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
 });
 
 const Login = () => {
@@ -38,41 +39,45 @@ const Login = () => {
       setError(null);
       await login(values.email, values.password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : "Falha ao entrar");
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="auth-form-container">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/50 px-4">
+      <div className="auth-form-container animate-fade-in shadow-lg">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold">Welcome back</h1>
-          <p className="text-muted-foreground">
-            Enter your credentials to access your account
+          <h1 className="text-3xl font-bold text-primary">Bem-vindo de volta</h1>
+          <p className="text-muted-foreground mt-2">
+            Digite suas credenciais para acessar sua conta
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded border border-destructive p-3 text-destructive">
+          <div className="mb-6 rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
             {error}
           </div>
         )}
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-base">Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="you@example.com"
-                      type="email"
-                      autoComplete="email"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="seu@email.com"
+                        type="email"
+                        autoComplete="email"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,44 +90,48 @@ const Login = () => {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-base">Senha</FormLabel>
                     <Link
                       to="/forgot-password"
                       className="text-sm font-medium text-primary hover:underline"
                     >
-                      Forgot password?
+                      Esqueceu a senha?
                     </Link>
                   </div>
                   <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      autoComplete="current-password"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <LockKeyhole className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="••••••••"
+                        type="password"
+                        autoComplete="current-password"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full text-base py-6" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></span>
-                  Signing in...
+                  Entrando...
                 </>
               ) : (
-                "Sign in"
+                "Entrar"
               )}
             </Button>
           </form>
         </Form>
 
-        <div className="mt-6 text-center text-sm">
-          Don't have an account?{" "}
-          <Link to="/signup" className="font-medium text-primary hover:underline">
-            Sign up
+        <div className="mt-8 text-center">
+          <p className="text-muted-foreground">Não tem uma conta?</p>
+          <Link to="/signup" className="mt-2 inline-block font-medium text-primary hover:underline">
+            Criar conta agora
           </Link>
         </div>
       </div>

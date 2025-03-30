@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
+import { User, Mail, LockKeyhole } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -50,35 +51,39 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="auth-form-container">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/50 px-4">
+      <div className="auth-form-container animate-fade-in shadow-lg">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold">Criar uma conta</h1>
-          <p className="text-muted-foreground">
-            Insira suas informações para começar
+          <h1 className="text-3xl font-bold text-primary">Criar uma conta</h1>
+          <p className="text-muted-foreground mt-2">
+            Preencha as informações abaixo para começar
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded border border-destructive p-3 text-destructive">
+          <div className="mb-6 rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
             {error}
           </div>
         )}
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-base">Nome</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      autoComplete="name"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="João Silva"
+                        autoComplete="name"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,14 +95,18 @@ const Signup = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-base">Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="you@example.com"
-                      type="email"
-                      autoComplete="email"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="seu@email.com"
+                        type="email"
+                        autoComplete="email"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,14 +118,18 @@ const Signup = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-base">Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      autoComplete="new-password"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <LockKeyhole className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="••••••••"
+                        type="password"
+                        autoComplete="new-password"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,21 +141,25 @@ const Signup = () => {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel className="text-base">Confirmar Senha</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      autoComplete="new-password"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <LockKeyhole className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        placeholder="••••••••"
+                        type="password"
+                        autoComplete="new-password"
+                        className="pl-10"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full text-base py-6" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></span>
@@ -155,10 +172,10 @@ const Signup = () => {
           </form>
         </Form>
 
-        <div className="mt-6 text-center text-sm">
-          Já tem uma conta?{" "}
-          <Link to="/login" className="font-medium text-primary hover:underline">
-            Faça login
+        <div className="mt-8 text-center">
+          <p className="text-muted-foreground">Já tem uma conta?</p>
+          <Link to="/login" className="mt-2 inline-block font-medium text-primary hover:underline">
+            Entrar agora
           </Link>
         </div>
       </div>
