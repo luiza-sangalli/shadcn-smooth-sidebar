@@ -11,30 +11,36 @@ export type Database = {
     Tables: {
       courses: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           id: string
           instructor: string
+          is_published: boolean | null
           price: number
           thumbnail_url: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           instructor: string
+          is_published?: boolean | null
           price?: number
           thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
           instructor?: string
+          is_published?: boolean | null
           price?: number
           thumbnail_url?: string | null
           title?: string
@@ -84,6 +90,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_published: boolean | null
           position: number
           title: string
           updated_at: string
@@ -93,6 +100,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_published?: boolean | null
           position?: number
           title: string
           updated_at?: string
@@ -102,6 +110,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_published?: boolean | null
           position?: number
           title?: string
           updated_at?: string

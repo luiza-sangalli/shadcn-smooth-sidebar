@@ -20,6 +20,7 @@ export interface Module extends ModuleRow {
 
 export interface Video extends VideoRow {
   // Add any additional frontend-specific properties
+  is_published?: boolean; // Frontend computed property based on published_at
 }
 
 export interface Profile extends ProfileRow {

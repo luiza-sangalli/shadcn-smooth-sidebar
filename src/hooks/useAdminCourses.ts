@@ -233,20 +233,35 @@ export function useAdminCourses() {
     try {
       setIsLoading(true);
       
+      // Mapear is_published para published_at
+      const dbVideoData = {
+        ...videoData,
+        published_at: videoData.is_published === false ? null : new Date().toISOString()
+      };
+      
+      // Remover is_published antes de enviar para o Supabase
+      delete (dbVideoData as any).is_published;
+      
       const { data, error } = await supabase
         .from("videos")
-        .insert(videoData)
+        .insert(dbVideoData)
         .select()
         .single();
       
       if (error) throw error;
+      
+      // Adicionar de volta is_published ao retorno
+      const videoWithStatus = {
+        ...data,
+        is_published: !!data.published_at
+      };
       
       toast({
         title: "Vídeo criado",
         description: "O vídeo foi criado com sucesso!",
       });
       
-      return data;
+      return videoWithStatus;
     } catch (error) {
       console.error("Erro ao criar vídeo:", error);
       toast({
@@ -265,21 +280,36 @@ export function useAdminCourses() {
     try {
       setIsLoading(true);
       
+      // Preparar dados para atualização
+      const dbVideoData: any = { ...videoData };
+      
+      // Se is_published estiver definido, mapear para published_at
+      if (typeof dbVideoData.is_published !== 'undefined') {
+        dbVideoData.published_at = dbVideoData.is_published === false ? null : new Date().toISOString();
+        delete dbVideoData.is_published;
+      }
+      
       const { data, error } = await supabase
         .from("videos")
-        .update(videoData)
+        .update(dbVideoData)
         .eq("id", videoId)
         .select()
         .single();
       
       if (error) throw error;
       
+      // Adicionar de volta is_published ao retorno
+      const videoWithStatus = {
+        ...data,
+        is_published: !!data.published_at
+      };
+      
       toast({
         title: "Vídeo atualizado",
         description: "O vídeo foi atualizado com sucesso!",
       });
       
-      return data;
+      return videoWithStatus;
     } catch (error) {
       console.error("Erro ao atualizar vídeo:", error);
       toast({
