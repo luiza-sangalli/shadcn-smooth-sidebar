@@ -56,6 +56,9 @@ const App = () => (
               <Route path="/course/:courseId/video/:videoId" element={<VideoPlayer />} />
             </Route>
             
+            {/* Profile route redirects to my-account */}
+            <Route path="/profile" element={<Navigate to="/my-account" replace />} />
+            
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
