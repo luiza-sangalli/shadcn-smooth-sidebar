@@ -89,7 +89,13 @@ export function useProfile() {
         const enhancedProfile: Profile = {
           ...data,
           email: user.email,
-          name: data.name || user?.name || user?.email?.split('@')[0] || ""
+          name: data.name || user?.name || user?.email?.split('@')[0] || "",
+          // Map database columns to profile properties
+          documentType: data.document_type,
+          documentNumber: data.document_number,
+          socialName: data.social_name,
+          companyName: data.company_name,
+          zipCode: data.zip_code
         };
         
         setProfile(enhancedProfile);
@@ -182,41 +188,31 @@ export function useProfile() {
         return;
       }
       
-      // Update in Supabase - The key fix: Only include fields that exist in the profiles table
+      // Mapeie os campos do perfil para as colunas do banco de dados
+      const dbData = {
+        name: updatedData.name,
+        avatar_url: updatedData.avatar_url,
+        social_name: updatedData.socialName,
+        whatsapp: updatedData.whatsapp,
+        document_type: updatedData.documentType,
+        document_number: updatedData.documentNumber,
+        company_name: updatedData.companyName,
+        address: updatedData.address,
+        city: updatedData.city,
+        state: updatedData.state,
+        zip_code: updatedData.zipCode,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Update in Supabase with all fields
       const { error } = await supabase
         .from("profiles")
-        .update({
-          name: updatedData.name,
-          avatar_url: updatedData.avatar_url,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbData)
         .eq("id", user.id);
 
       if (error) {
         console.error("Error updating profile in Supabase:", error);
         throw error;
-      }
-
-      // Store extended profile data in local storage as Supabase profiles table 
-      // doesn't have all the fields we need
-      try {
-        // Store additional profile data in localStorage
-        const extendedProfileData = {
-          socialName: updatedData.socialName,
-          whatsapp: updatedData.whatsapp,
-          documentType: updatedData.documentType,
-          documentNumber: updatedData.documentNumber,
-          companyName: updatedData.companyName,
-          address: updatedData.address,
-          city: updatedData.city,
-          state: updatedData.state,
-          zipCode: updatedData.zipCode
-        };
-        
-        localStorage.setItem(`extendedProfile_${user.id}`, JSON.stringify(extendedProfileData));
-        console.log("Extended profile data saved to localStorage:", extendedProfileData);
-      } catch (storageErr) {
-        console.error("Error saving extended profile data to localStorage:", storageErr);
       }
 
       // Update the local state with all data

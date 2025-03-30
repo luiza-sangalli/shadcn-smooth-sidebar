@@ -127,25 +127,52 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          city: string | null
+          company_name: string | null
           created_at: string
+          document_number: string | null
+          document_type: string | null
           id: string
           name: string | null
+          social_name: string | null
+          state: string | null
           updated_at: string
+          whatsapp: string | null
+          zip_code: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          company_name?: string | null
           created_at?: string
+          document_number?: string | null
+          document_type?: string | null
           id: string
           name?: string | null
+          social_name?: string | null
+          state?: string | null
           updated_at?: string
+          whatsapp?: string | null
+          zip_code?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          company_name?: string | null
           created_at?: string
+          document_number?: string | null
+          document_type?: string | null
           id?: string
           name?: string | null
+          social_name?: string | null
+          state?: string | null
           updated_at?: string
+          whatsapp?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
