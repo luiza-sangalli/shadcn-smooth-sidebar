@@ -11,7 +11,7 @@ import { Course } from '@/types';
 // Mock data for enrolled courses - this will be replaced with real data later
 const enrolledCourses = [
   {
-    id: 4,
+    id: "4",
     title: 'JavaScript Avançado',
     description: 'Domine os conceitos avançados de JavaScript',
     progress: 75,
@@ -19,7 +19,7 @@ const enrolledCourses = [
     image: 'https://images.unsplash.com/photo-1552308995-2baac1ad5490?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
   },
   {
-    id: 5,
+    id: "5",
     title: 'Marketing Digital',
     description: 'Estratégias para divulgar sua marca online',
     progress: 30,
