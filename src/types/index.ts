@@ -29,17 +29,33 @@ export interface Video extends VideoRow {
   is_published?: boolean; // Frontend computed property based on published_at
 }
 
-export interface Profile extends ProfileRow {
-  // Add any additional frontend-specific properties
+// The Profile interface must properly extend ProfileRow
+// The problem is that ProfileRow fields are required, but we marked them as optional in Profile
+export interface Profile {
+  // Include all fields from ProfileRow
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string | null;
+  avatar_url: string | null;
+  
+  // Database fields that are nullable in ProfileRow
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  whatsapp: string | null;
+  document_type: string | null;
+  document_number: string | null;
+  social_name: string | null;
+  company_name: string | null;
+  zip_code: string | null;
+  
+  // Additional frontend properties
   email?: string;
   documentType?: 'cpf' | 'cnpj';
   documentNumber?: string;
   socialName?: string;
   companyName?: string;
-  whatsapp?: string;
-  address?: string;
-  city?: string;
-  state?: string;
   zipCode?: string;
 }
 
