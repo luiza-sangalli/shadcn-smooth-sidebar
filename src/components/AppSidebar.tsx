@@ -22,7 +22,7 @@ import { toast } from '@/components/ui/use-toast';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
-  const { isDefinitelyAdmin, isLoading: roleLoading, refetch } = useUserRole();
+  const { isAdmin, refetch } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<Array<{name: string, icon: any, path: string}>>([]);
@@ -49,22 +49,20 @@ export const AppSidebar = () => {
   // Force a refetch when component mounts or route changes
   useEffect(() => {
     refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [refetch, location.pathname]);
 
-  // Update menu items when isDefinitelyAdmin changes
+  // Update menu items when isAdmin changes
   useEffect(() => {
     console.log("AppSidebar - Admin status:", {
-      isDefinitelyAdmin,
-      roleLoading,
+      isAdmin,
       path: location.pathname
     });
     
     // Start with main menu items
     const updatedMenuItems = [...mainMenuItems];
     
-    // Add admin item if user is definitely admin
-    if (isDefinitelyAdmin) {
+    // Add admin item if user is admin
+    if (isAdmin) {
       console.log("Adding admin menu item - user is confirmed admin");
       updatedMenuItems.push({
         name: 'Administração',
@@ -74,7 +72,7 @@ export const AppSidebar = () => {
     }
     
     setMenuItems(updatedMenuItems);
-  }, [isDefinitelyAdmin, roleLoading, location.pathname]);
+  }, [isAdmin, location.pathname]);
 
   // Helper function to get user initial or fallback
   const getUserInitial = () => {
@@ -93,6 +91,7 @@ export const AppSidebar = () => {
     
     // Special handling for admin route
     if (path === '/admin') {
+      // Force refetch roles to ensure latest admin status
       refetch().then(({ data }) => {
         const hasAdminRole = data?.some(r => r.role === "admin");
         
@@ -105,13 +104,7 @@ export const AppSidebar = () => {
           return;
         }
         
-        toast({
-          title: "Acessando área administrativa",
-          description: "Redirecionando para o painel administrativo...",
-        });
-        
-        // Force navigation to admin page with a hard reload
-        window.location.href = '/admin';
+        navigate('/admin');
       });
       return;
     }

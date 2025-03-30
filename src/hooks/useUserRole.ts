@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,9 +8,14 @@ export type UserRole = "admin" | "user";
 
 export function useUserRole() {
   const { user, isAuthenticated } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [adminStatus, setAdminStatus] = useState<boolean | null>(null);
   
-  const { data: userRoles, isLoading, refetch } = useQuery({
+  const { 
+    data: userRoles, 
+    isLoading, 
+    refetch,
+    isError
+  } = useQuery({
     queryKey: ["user-roles", user?.id],
     queryFn: async () => {
       if (!isAuthenticated || !user?.id) {
@@ -34,28 +40,38 @@ export function useUserRole() {
     },
     enabled: !!user?.id && isAuthenticated,
     refetchOnWindowFocus: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 5000, // Reduced to 5 seconds for more frequent refreshes
   });
   
+  // Update admin status whenever role data changes or loads
   useEffect(() => {
-    if (!isLoading && userRoles) {
+    if (userRoles) {
       const hasAdminRole = userRoles.some(r => r.role === "admin");
-      console.log("Is admin determined:", hasAdminRole, "User roles:", userRoles);
-      setIsAdmin(hasAdminRole);
-    } else if (isLoading) {
-      // Keep as null while loading
-      setIsAdmin(null);
-    } else {
-      // If not loading and no roles, definitely not admin
-      setIsAdmin(false);
+      console.log("Admin status determined:", hasAdminRole, "User roles:", userRoles);
+      setAdminStatus(hasAdminRole);
+    } else if (isError) {
+      console.error("Error loading roles, defaulting to non-admin");
+      setAdminStatus(false);
+    } else if (!isLoading && !userRoles?.length) {
+      // If query completed but no roles found
+      console.log("No roles found, user is not admin");
+      setAdminStatus(false);
     }
-  }, [userRoles, isLoading]);
+  }, [userRoles, isLoading, isError]);
+
+  // Ensure we expose a reliable admin status
+  const isAdmin = adminStatus === true;
   
   return {
-    isAdmin: isAdmin === null ? false : isAdmin, // Default to false if null
-    isDefinitelyAdmin: isAdmin === true, // Only true when we know for sure
+    isAdmin,
     userRoles,
     isLoading,
-    refetch
+    refetch,
+    // Debug data - helpful for troubleshooting
+    _debug: {
+      adminStatus,
+      userRolesData: userRoles,
+      authUser: user?.id
+    }
   };
 }
