@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
+import MyCourses from "./pages/MyCourses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,7 +40,7 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/my-courses" element={<Dashboard />} /> {/* Placeholder for My Courses page */}
+              <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/users" element={<Dashboard />} /> {/* Placeholder */}
               <Route path="/analytics" element={<Dashboard />} /> {/* Placeholder */}
               <Route path="/settings" element={<Dashboard />} /> {/* Placeholder */}
