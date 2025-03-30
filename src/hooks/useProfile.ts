@@ -25,9 +25,10 @@ export function useProfile() {
         
         // For mock auth, create a mock profile since we don't have a real Supabase profile
         if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+          console.log("Creating mock profile with user data:", user);
           const mockProfile: Profile = {
             id: user.id,
-            name: user.name || "",
+            name: user.user_metadata?.name || user.name || "",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             avatar_url: null,
@@ -51,10 +52,14 @@ export function useProfile() {
 
         if (error) throw error;
 
+        console.log("Fetched profile data:", data);
+        console.log("User data:", user);
+
         // Add email from auth user to profile
         const enhancedProfile: Profile = {
           ...data,
-          email: user.email
+          email: user.email,
+          name: data.name || user.user_metadata?.name || user.name || ""
         };
         
         setProfile(enhancedProfile);
@@ -111,7 +116,17 @@ export function useProfile() {
         .update({
           name: updatedData.name,
           avatar_url: updatedData.avatar_url,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          // Add any additional fields that need to be updated
+          whatsapp: updatedData.whatsapp,
+          socialName: updatedData.socialName,
+          documentType: updatedData.documentType,
+          documentNumber: updatedData.documentNumber,
+          companyName: updatedData.companyName,
+          address: updatedData.address,
+          city: updatedData.city,
+          state: updatedData.state,
+          zipCode: updatedData.zipCode
         })
         .eq("id", user.id);
 

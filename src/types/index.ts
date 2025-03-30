@@ -9,7 +9,7 @@ export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 export type EnrollmentRow = Database['public']['Tables']['enrollments']['Row'];
 export type ProgressRow = Database['public']['Tables']['progress']['Row'];
 
-// Define enhanced types with additional frontend properties if needed
+// Define enhanced types with additional frontend-specific properties
 export interface Course extends CourseRow {
   // Add any additional frontend-specific properties
 }
