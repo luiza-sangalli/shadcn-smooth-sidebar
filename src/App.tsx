@@ -18,6 +18,7 @@ import MyCourses from "./pages/MyCourses";
 import MyAccount from "./pages/MyAccount";
 import CourseDetail from "./pages/CourseDetail";
 import VideoPlayer from "./pages/VideoPlayer";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/my-account" element={<MyAccount />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/course/:courseId" element={<CourseDetail />} />
               <Route path="/course/:courseId/video/:videoId" element={<VideoPlayer />} />
             </Route>
