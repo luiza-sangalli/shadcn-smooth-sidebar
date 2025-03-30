@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -20,11 +21,13 @@ import { Home, LogOut, BookOpen, User, Shield } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isLoading: roleLoading } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
 
-  console.log("AppSidebar - isAdmin:", isAdmin);
+  useEffect(() => {
+    console.log("AppSidebar - isAdmin:", isAdmin, "roleLoading:", roleLoading);
+  }, [isAdmin, roleLoading]);
 
   // Basic menu items available to all users
   const mainMenuItems = [
@@ -67,10 +70,11 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click - ensure this works properly
+  // Handle menu item click
   const handleMenuItemClick = (path: string) => {
     console.log("Navigating to:", path);
-    navigate(path);
+    // Force a hard navigation to ensure the route is properly processed
+    window.location.href = path;
   };
 
   return (

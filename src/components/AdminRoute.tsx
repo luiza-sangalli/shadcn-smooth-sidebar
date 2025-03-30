@@ -15,8 +15,14 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const isLoading = authLoading || roleLoading;
 
   useEffect(() => {
-    console.log("AdminRoute - Auth status:", { isAuthenticated, isAdmin, isLoading });
-  }, [isAuthenticated, isAdmin, isLoading]);
+    console.log("AdminRoute - Auth status:", { 
+      isAuthenticated, 
+      isAdmin, 
+      isLoading,
+      authLoading,
+      roleLoading
+    });
+  }, [isAuthenticated, isAdmin, isLoading, authLoading, roleLoading]);
 
   if (isLoading) {
     return (

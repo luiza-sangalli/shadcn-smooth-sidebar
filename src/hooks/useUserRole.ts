@@ -13,7 +13,10 @@ export function useUserRole() {
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ["user-roles", user?.id],
     queryFn: async () => {
-      if (!isAuthenticated || !user?.id) return [];
+      if (!isAuthenticated || !user?.id) {
+        console.log("Not fetching roles: user not authenticated or missing ID");
+        return [];
+      }
       
       console.log("Fetching roles for user:", user.id);
       
@@ -38,7 +41,7 @@ export function useUserRole() {
   useEffect(() => {
     if (userRoles) {
       const hasAdminRole = userRoles.some(r => r.role === "admin");
-      console.log("Is admin:", hasAdminRole);
+      console.log("Is admin determined:", hasAdminRole, "User roles:", userRoles);
       setIsAdmin(hasAdminRole);
     } else {
       setIsAdmin(false);
