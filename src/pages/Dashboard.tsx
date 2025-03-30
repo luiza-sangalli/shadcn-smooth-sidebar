@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -98,7 +99,9 @@ const Dashboard = () => {
                   <p className="text-xs text-right mt-1 text-muted-foreground">{course.progress}% completo</p>
                 </CardContent>
                 <CardFooter className="mt-auto">
-                  <Button className="w-full">Continuar Curso</Button>
+                  <Button asChild className="w-full">
+                    <Link to={`/course/${course.id}`}>Continuar Curso</Link>
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
@@ -141,8 +144,13 @@ const Dashboard = () => {
                   <span className="text-sm font-bold text-primary">{course.price}</span>
                 </div>
               </CardContent>
-              <CardFooter className="mt-auto">
-                <Button className="w-full">Comprar Curso</Button>
+              <CardFooter className="mt-auto grid grid-cols-2 gap-4">
+                <Button variant="outline" asChild>
+                  <Link to={`/course/${course.id}`}>Saber Mais</Link>
+                </Button>
+                <Button asChild>
+                  <Link to={`/course/${course.id}`}>Comprar Curso</Link>
+                </Button>
               </CardFooter>
             </Card>
           ))}
