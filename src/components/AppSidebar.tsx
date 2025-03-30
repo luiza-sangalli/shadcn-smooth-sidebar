@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -17,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-import { Home, LayoutDashboard, LogOut, BookOpen, User, Shield } from 'lucide-react';
+import { Home, LogOut, BookOpen, User, Shield } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
@@ -46,7 +45,7 @@ export const AppSidebar = () => {
     },
   ];
   
-  // Admin menu item - only included for admin users
+  // Create the menu items array with admin item conditionally added
   const menuItems = [...mainMenuItems];
   if (isAdmin) {
     console.log("Adding admin menu item");
@@ -68,7 +67,7 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click
+  // Handle menu item click - ensure this works properly
   const handleMenuItemClick = (path: string) => {
     console.log("Navigating to:", path);
     navigate(path);
