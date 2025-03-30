@@ -9,11 +9,15 @@ import { Play, FileVideo, Clock, BookOpen } from "lucide-react";
 import { useCourseContent } from "@/hooks/useCourseContent";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePurchaseCourse } from "@/hooks/usePurchaseCourse";
+import { useAuth } from "@/contexts/AuthContext";
 
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { course, loading, error } = useCourseContent(courseId);
   const { toast } = useToast();
+  const { purchaseCourse, isLoading } = usePurchaseCourse();
+  const { user } = useAuth();
   
   // Handling loading state
   if (loading) {
@@ -72,13 +76,26 @@ const CourseDetail: React.FC = () => {
     return 'Avançado';
   };
 
-  const handlePurchaseCourse = () => {
-    toast({
-      title: "Compra iniciada",
-      description: "Você será redirecionado para a página de pagamento.",
-      duration: 3000,
-    });
-    // Implement actual purchase flow
+  const handlePurchaseCourse = async () => {
+    if (!user) {
+      toast({
+        title: "Atenção",
+        description: "Você precisa estar logado para comprar um curso.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    const checkoutUrl = await purchaseCourse(
+      course.id,
+      course.title,
+      Number(course.price)
+    );
+    
+    if (checkoutUrl) {
+      // Redirect to Mercado Pago checkout
+      window.location.href = checkoutUrl;
+    }
   };
   
   return (
@@ -122,9 +139,13 @@ const CourseDetail: React.FC = () => {
                 Continuar Assistindo
               </Button>
             ) : (
-              <Button className="w-full md:w-auto" onClick={handlePurchaseCourse}>
+              <Button 
+                className="w-full md:w-auto" 
+                onClick={handlePurchaseCourse}
+                disabled={isLoading}
+              >
                 <BookOpen className="mr-2 h-4 w-4" />
-                Comprar Curso por R$ {Number(course.price).toFixed(2)}
+                {isLoading ? 'Processando...' : `Comprar Curso por R$ ${Number(course.price).toFixed(2)}`}
               </Button>
             )}
           </div>
