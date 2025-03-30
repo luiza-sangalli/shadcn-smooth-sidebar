@@ -16,12 +16,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Home, LayoutDashboard, LogOut, BookOpen, User, Shield } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
 
+  // Basic menu items available to all users
   const mainMenuItems = [
     {
       name: 'Início',
@@ -38,12 +41,16 @@ export const AppSidebar = () => {
       icon: User,
       path: '/my-account',
     },
-    {
+  ];
+  
+  // Admin menu item - only included for admin users
+  if (isAdmin) {
+    mainMenuItems.push({
       name: 'Administração',
       icon: Shield,
       path: '/admin',
-    },
-  ];
+    });
+  }
 
   // Helper function to get user initial or fallback
   const getUserInitial = () => {
