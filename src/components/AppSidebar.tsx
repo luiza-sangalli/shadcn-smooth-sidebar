@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, LayoutDashboard, Settings, Users, BarChart, LogOut, BookOpen } from 'lucide-react';
+import { Home, LayoutDashboard, LogOut, BookOpen, User } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
@@ -34,19 +34,9 @@ export const AppSidebar = () => {
       path: '/my-courses',
     },
     {
-      name: 'Usuários',
-      icon: Users,
-      path: '/users',
-    },
-    {
-      name: 'Analytics',
-      icon: BarChart,
-      path: '/analytics',
-    },
-    {
-      name: 'Configurações',
-      icon: Settings,
-      path: '/settings',
+      name: 'Minha Conta',
+      icon: User,
+      path: '/my-account',
     },
   ];
 

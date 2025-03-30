@@ -15,6 +15,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import MyCourses from "./pages/MyCourses";
+import MyAccount from "./pages/MyAccount";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,9 +42,7 @@ const App = () => (
             }>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-courses" element={<MyCourses />} />
-              <Route path="/users" element={<Dashboard />} /> {/* Placeholder */}
-              <Route path="/analytics" element={<Dashboard />} /> {/* Placeholder */}
-              <Route path="/settings" element={<Dashboard />} /> {/* Placeholder */}
+              <Route path="/my-account" element={<MyAccount />} />
             </Route>
             
             {/* Catch-all */}
