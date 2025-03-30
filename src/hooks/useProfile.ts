@@ -22,6 +22,7 @@ export function useProfile() {
     async function fetchProfile() {
       try {
         setLoading(true);
+        console.log("Fetching profile for user:", user);
         
         // For mock auth, create a mock profile since we don't have a real Supabase profile
         if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
@@ -43,6 +44,32 @@ export function useProfile() {
           return;
         }
         
+        // In production, try to fetch from Supabase
+        console.log("Attempting to fetch profile from Supabase for user ID:", user.id);
+        
+        // Check if user ID is in UUID format for Supabase
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
+        
+        if (!isUUID) {
+          console.log("User ID is not in UUID format. Creating mock profile for production.");
+          // If not a UUID (like in mock auth), create a mock profile
+          const mockProfile: Profile = {
+            id: user.id,
+            name: user.name || "",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            avatar_url: null,
+            email: user.email,
+            whatsapp: "",
+            documentType: "cpf",
+            documentNumber: ""
+          };
+          
+          setProfile(mockProfile);
+          setLoading(false);
+          return;
+        }
+        
         // Fetch from Supabase
         const { data, error } = await supabase
           .from("profiles")
@@ -50,7 +77,10 @@ export function useProfile() {
           .eq("id", user.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase query error:", error);
+          throw error;
+        }
 
         console.log("Fetched profile data:", data);
         console.log("User data:", user);
@@ -65,11 +95,30 @@ export function useProfile() {
         setProfile(enhancedProfile);
       } catch (err) {
         console.error("Error fetching profile:", err);
+        
+        // Create a fallback profile if fetch fails
+        if (user) {
+          console.log("Creating fallback profile due to fetch error");
+          const fallbackProfile: Profile = {
+            id: user.id,
+            name: user.name || "",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            avatar_url: null,
+            email: user.email,
+            whatsapp: "",
+            documentType: "cpf",
+            documentNumber: ""
+          };
+          
+          setProfile(fallbackProfile);
+        }
+        
         setError(err instanceof Error ? err : new Error("Failed to fetch profile"));
         toast({
-          title: "Error",
-          description: "Failed to load your profile. Please try again later.",
-          variant: "destructive",
+          title: "Aviso",
+          description: "Usando perfil padrão. Alguns dados podem não estar disponíveis.",
+          variant: "default",
         });
       } finally {
         setLoading(false);
@@ -83,8 +132,8 @@ export function useProfile() {
   const updateProfile = async (updatedData: Partial<Profile>) => {
     if (!user || !profile) {
       toast({
-        title: "Error",
-        description: "You must be logged in to update your profile.",
+        title: "Erro",
+        description: "Você precisa estar logado para atualizar seu perfil.",
         variant: "destructive",
       });
       return;
@@ -92,6 +141,8 @@ export function useProfile() {
 
     try {
       setLoading(true);
+      console.log("Updating profile for user:", user.id);
+      console.log("Update data:", updatedData);
       
       // In development with mock auth, just update the state
       if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
@@ -103,8 +154,29 @@ export function useProfile() {
         
         setProfile(updatedProfile);
         toast({
-          title: "Profile updated",
-          description: "Your profile has been updated successfully."
+          title: "Perfil atualizado",
+          description: "Seu perfil foi atualizado com sucesso."
+        });
+        
+        return;
+      }
+      
+      // Check if user ID is in UUID format
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user.id);
+      
+      if (!isUUID) {
+        console.log("User ID is not in UUID format. Updating mock profile for production.");
+        // If not a UUID, just update the local state
+        const updatedProfile = {
+          ...profile,
+          ...updatedData,
+          updated_at: new Date().toISOString()
+        };
+        
+        setProfile(updatedProfile);
+        toast({
+          title: "Perfil atualizado",
+          description: "Seu perfil foi atualizado com sucesso."
         });
         
         return;
@@ -130,20 +202,23 @@ export function useProfile() {
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating profile in Supabase:", error);
+        throw error;
+      }
 
       // Update the local state
       setProfile((prev) => prev ? { ...prev, ...updatedData } : null);
       
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully."
+        title: "Perfil atualizado",
+        description: "Seu perfil foi atualizado com sucesso."
       });
     } catch (err) {
       console.error("Error updating profile:", err);
       toast({
-        title: "Update failed",
-        description: "Failed to update your profile. Please try again.",
+        title: "Falha na atualização",
+        description: "Não foi possível atualizar seu perfil. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
