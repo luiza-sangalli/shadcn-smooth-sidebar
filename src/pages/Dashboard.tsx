@@ -45,7 +45,7 @@ const Dashboard = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Início</h1>
         <p className="text-muted-foreground">
-          Olá, {user?.name}! Confira nossos novos cursos e continue seus estudos.
+          Olá, {user?.name || user?.email?.split('@')[0] || 'Usuário'}! Confira nossos novos cursos e continue seus estudos.
         </p>
       </div>
       

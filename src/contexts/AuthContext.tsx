@@ -3,7 +3,12 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
+import { Session, User as SupabaseUser } from "@supabase/supabase-js";
+
+// Extended User type that includes name
+export interface User extends SupabaseUser {
+  name?: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -31,7 +36,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, newSession) => {
         console.log("Auth state changed:", event, newSession?.user?.id);
         setSession(newSession);
-        setUser(newSession?.user ?? null);
+        
+        // Set user with name from user_metadata if available
+        if (newSession?.user) {
+          const userData: User = {
+            ...newSession.user,
+            name: newSession.user.user_metadata?.name || newSession.user.email?.split('@')[0] || ''
+          };
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
         
         // If we have a new session and the event is SIGNED_IN, show success message
         if (newSession && event === 'SIGNED_IN') {
@@ -47,7 +62,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       console.log("Checking existing session:", currentSession?.user?.id);
       setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      
+      // Set user with name from user_metadata if available
+      if (currentSession?.user) {
+        const userData: User = {
+          ...currentSession.user,
+          name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0] || ''
+        };
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+      
       setIsLoading(false);
     });
 

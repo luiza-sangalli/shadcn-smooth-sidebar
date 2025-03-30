@@ -34,7 +34,7 @@ const DashboardLayout: React.FC = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
                     <User className="h-4 w-4" />
-                    <span>{user?.name}</span>
+                    <span>{user?.name || user?.email?.split('@')[0]}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">

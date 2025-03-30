@@ -45,6 +45,17 @@ export const AppSidebar = () => {
     },
   ];
 
+  // Helper function to get user initial or fallback
+  const getUserInitial = () => {
+    if (user?.name && user.name.length > 0) {
+      return user.name.charAt(0).toUpperCase();
+    } 
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
@@ -81,13 +92,13 @@ export const AppSidebar = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} alt={user?.name} />
+              <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} alt={user?.name || user?.email} />
               <AvatarFallback>
-                {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                {getUserInitial()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">{user?.name}</p>
+              <p className="text-sm font-medium">{user?.name || user?.email?.split('@')[0]}</p>
               <p className="text-xs text-sidebar-foreground/70 truncate max-w-[120px]">
                 {user?.email}
               </p>

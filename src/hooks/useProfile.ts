@@ -29,7 +29,7 @@ export function useProfile() {
           console.log("Creating mock profile with user data:", user);
           const mockProfile: Profile = {
             id: user.id,
-            name: user.name || "",
+            name: user?.name || user?.email?.split('@')[0] || "",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             avatar_url: null,
@@ -55,7 +55,7 @@ export function useProfile() {
           // If not a UUID (like in mock auth), create a mock profile
           const mockProfile: Profile = {
             id: user.id,
-            name: user.name || "",
+            name: user?.name || user?.email?.split('@')[0] || "",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             avatar_url: null,
@@ -89,7 +89,7 @@ export function useProfile() {
         const enhancedProfile: Profile = {
           ...data,
           email: user.email,
-          name: data.name || user.name || ""
+          name: data.name || user?.name || user?.email?.split('@')[0] || ""
         };
         
         setProfile(enhancedProfile);
@@ -101,7 +101,7 @@ export function useProfile() {
           console.log("Creating fallback profile due to fetch error");
           const fallbackProfile: Profile = {
             id: user.id,
-            name: user.name || "",
+            name: user?.name || user?.email?.split('@')[0] || "",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             avatar_url: null,
