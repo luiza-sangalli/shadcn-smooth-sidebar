@@ -182,23 +182,13 @@ export function useProfile() {
         return;
       }
       
-      // Update in Supabase
+      // Update in Supabase - The key fix: Only include fields that exist in the profiles table
       const { error } = await supabase
         .from("profiles")
         .update({
           name: updatedData.name,
           avatar_url: updatedData.avatar_url,
-          updated_at: new Date().toISOString(),
-          // Add any additional fields that need to be updated
-          whatsapp: updatedData.whatsapp,
-          socialName: updatedData.socialName,
-          documentType: updatedData.documentType,
-          documentNumber: updatedData.documentNumber,
-          companyName: updatedData.companyName,
-          address: updatedData.address,
-          city: updatedData.city,
-          state: updatedData.state,
-          zipCode: updatedData.zipCode
+          updated_at: new Date().toISOString()
         })
         .eq("id", user.id);
 
@@ -207,7 +197,29 @@ export function useProfile() {
         throw error;
       }
 
-      // Update the local state
+      // Store extended profile data in local storage as Supabase profiles table 
+      // doesn't have all the fields we need
+      try {
+        // Store additional profile data in localStorage
+        const extendedProfileData = {
+          socialName: updatedData.socialName,
+          whatsapp: updatedData.whatsapp,
+          documentType: updatedData.documentType,
+          documentNumber: updatedData.documentNumber,
+          companyName: updatedData.companyName,
+          address: updatedData.address,
+          city: updatedData.city,
+          state: updatedData.state,
+          zipCode: updatedData.zipCode
+        };
+        
+        localStorage.setItem(`extendedProfile_${user.id}`, JSON.stringify(extendedProfileData));
+        console.log("Extended profile data saved to localStorage:", extendedProfileData);
+      } catch (storageErr) {
+        console.error("Error saving extended profile data to localStorage:", storageErr);
+      }
+
+      // Update the local state with all data
       setProfile((prev) => prev ? { ...prev, ...updatedData } : null);
       
       toast({
