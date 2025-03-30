@@ -8,6 +8,12 @@ export type VideoRow = Database['public']['Tables']['videos']['Row'];
 export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 export type EnrollmentRow = Database['public']['Tables']['enrollments']['Row'];
 export type ProgressRow = Database['public']['Tables']['progress']['Row'];
+export type UserRoleRow = {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'user';
+  created_at: string;
+};
 
 // Define enhanced types with additional frontend-specific properties
 export interface Course extends CourseRow {
@@ -42,6 +48,10 @@ export interface Enrollment extends EnrollmentRow {
 }
 
 export interface Progress extends ProgressRow {
+  // Add any additional frontend-specific properties
+}
+
+export interface UserRole extends UserRoleRow {
   // Add any additional frontend-specific properties
 }
 

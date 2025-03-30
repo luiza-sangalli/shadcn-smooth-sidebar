@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import DashboardLayout from "@/components/DashboardLayout";
 
 // Pages
@@ -46,7 +47,11 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/my-account" element={<MyAccount />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              } />
               <Route path="/course/:courseId" element={<CourseDetail />} />
               <Route path="/course/:courseId/video/:videoId" element={<VideoPlayer />} />
             </Route>
