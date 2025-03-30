@@ -47,7 +47,19 @@ export function usePurchaseCourse() {
         return null;
       }
       
+      // Log the response for debugging
       console.log("Resposta do servidor de pagamento:", data);
+      
+      if (!data || !data.initPoint) {
+        console.error('Invalid response from payment server:', data);
+        toast({
+          title: "Erro",
+          description: "Resposta inválida do servidor de pagamento. Contate o suporte.",
+          variant: "destructive",
+        });
+        return null;
+      }
+      
       return data.initPoint;
     } catch (error) {
       console.error('Error purchasing course:', error);

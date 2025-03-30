@@ -49,14 +49,14 @@ serve(async (req: Request) => {
       });
     }
 
-    // Mercado Pago API to create a preference
+    // Get Mercado Pago access token from config.toml using Deno.env
     const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
     const mercadoPagoAccessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
 
-    console.log("Using access token configured:", mercadoPagoAccessToken ? "Token is set" : "Token is NOT set");
+    console.log("Using Mercado Pago access token:", mercadoPagoAccessToken ? "Token is set" : "Token is NOT set");
 
     if (!mercadoPagoAccessToken) {
-      console.error('MERCADO_PAGO_ACCESS_TOKEN not configured');
+      console.error('MERCADO_PAGO_ACCESS_TOKEN not configured or empty');
       return new Response(JSON.stringify({ error: 'Payment provider not configured' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
