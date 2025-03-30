@@ -12,7 +12,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
+import ForgotPassword from "./pages/Forgot Password";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +39,7 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/my-courses" element={<Dashboard />} /> {/* Placeholder for My Courses page */}
               <Route path="/users" element={<Dashboard />} /> {/* Placeholder */}
               <Route path="/analytics" element={<Dashboard />} /> {/* Placeholder */}
               <Route path="/settings" element={<Dashboard />} /> {/* Placeholder */}

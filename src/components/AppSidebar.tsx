@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, LayoutDashboard, Settings, Users, BarChart, LogOut } from 'lucide-react';
+import { Home, LayoutDashboard, Settings, Users, BarChart, LogOut, BookOpen } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
@@ -24,12 +24,17 @@ export const AppSidebar = () => {
 
   const mainMenuItems = [
     {
-      name: 'Dashboard',
-      icon: LayoutDashboard,
+      name: 'Início',
+      icon: Home,
       path: '/dashboard',
     },
     {
-      name: 'Users',
+      name: 'Meus Cursos',
+      icon: BookOpen,
+      path: '/my-courses',
+    },
+    {
+      name: 'Usuários',
       icon: Users,
       path: '/users',
     },
@@ -39,7 +44,7 @@ export const AppSidebar = () => {
       path: '/analytics',
     },
     {
-      name: 'Settings',
+      name: 'Configurações',
       icon: Settings,
       path: '/settings',
     },
@@ -49,8 +54,8 @@ export const AppSidebar = () => {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
-          <Home className="h-6 w-6 text-primary" />
-          <span className="text-lg font-semibold">Admin UI</span>
+          <BookOpen className="h-6 w-6 text-primary" />
+          <span className="text-lg font-semibold">Educa+</span>
         </Link>
       </SidebarHeader>
       
