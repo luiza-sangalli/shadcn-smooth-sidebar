@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,7 @@ export const AppSidebar = () => {
   const { user, logout } = useAuth();
   const { isAdmin } = useUserRole();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Basic menu items available to all users
   const mainMenuItems = [
@@ -63,6 +64,12 @@ export const AppSidebar = () => {
     return 'U';
   };
 
+  // Handle menu item click
+  const handleMenuItemClick = (path: string) => {
+    console.log("Navigating to:", path);
+    navigate(path);
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
@@ -82,6 +89,7 @@ export const AppSidebar = () => {
                   <SidebarMenuButton
                     asChild
                     isActive={location.pathname === item.path}
+                    onClick={() => handleMenuItemClick(item.path)}
                   >
                     <Link to={item.path} className="flex items-center gap-3">
                       <item.icon className="h-5 w-5" />

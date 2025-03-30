@@ -31,6 +31,8 @@ export function useUserRole() {
       return data || [];
     },
     enabled: !!user?.id && isAuthenticated,
+    refetchOnWindowFocus: false,
+    staleTime: 60000, // 1 minute
   });
   
   useEffect(() => {

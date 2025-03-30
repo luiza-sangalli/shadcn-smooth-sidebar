@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -11,8 +11,13 @@ interface AdminRouteProps {
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
   
   const isLoading = authLoading || roleLoading;
+
+  useEffect(() => {
+    console.log("AdminRoute - Auth status:", { isAuthenticated, isAdmin, isLoading });
+  }, [isAuthenticated, isAdmin, isLoading]);
 
   if (isLoading) {
     return (
@@ -23,6 +28,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
+    console.log("User is not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
   
