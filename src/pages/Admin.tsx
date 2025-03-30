@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -926,7 +927,7 @@ const Admin = () => {
                                     Esta ação não pode ser desfeita e todos os vídeos 
                                     associados serão excluídos.
                                   </AlertDialogDescription>
-                              </AlertDialogHeader>
+                                </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                   <AlertDialogAction
@@ -1043,4 +1044,284 @@ const Admin = () => {
                     />
                     
                     <FormField
-                      control={
+                      control={videoForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descrição do Vídeo</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Descreva o vídeo" 
+                              rows={3}
+                              {...field} 
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={videoForm.control}
+                      name="duration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Duração*</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="00:00" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Formato: MM:SS ou HH:MM:SS
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={videoForm.control}
+                      name="video_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL do Vídeo*</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://exemplo.com/video.mp4" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Link para o vídeo (YouTube, Vimeo, etc.)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={videoForm.control}
+                      name="thumbnail_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL da Imagem (Thumbnail)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://exemplo.com/imagem.jpg" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            URL da imagem de capa do vídeo
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={videoForm.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Posição</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              min="0"
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Ordem em que o vídeo aparece no módulo
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={videoForm.control}
+                      name="is_published"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Publicado</FormLabel>
+                            <FormDescription>
+                              O vídeo ficará visível para os usuários
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    {editingVideo ? (
+                      <>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => {
+                            setEditingVideo(null);
+                            resetForms();
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button type="submit" disabled={isLoading}>
+                          <Check className="mr-2 h-4 w-4" />
+                          Salvar Alterações
+                        </Button>
+                      </>
+                    ) : (
+                      <Button type="submit" disabled={isLoading}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Criar Vídeo
+                      </Button>
+                    )}
+                  </CardFooter>
+                </form>
+              </Form>
+            </Card>
+            
+            {/* List of existing videos */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Vídeos Existentes</CardTitle>
+                <CardDescription>
+                  {videos?.length || 0} vídeos na plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {videos?.map((video) => {
+                    const moduleInfo = modules?.find(m => m.id === video.module_id);
+                    const courseInfo = moduleInfo 
+                      ? courses?.find(c => c.id === moduleInfo.course_id) 
+                      : null;
+                    return (
+                      <AccordionItem key={video.id} value={video.id}>
+                        <AccordionTrigger className="flex items-center group">
+                          <div className="flex items-center gap-2 flex-1 pr-4">
+                            <Video className={cn(
+                              "mr-2 h-4 w-4",
+                              video.is_published === false && "text-muted-foreground"
+                            )} />
+                            <span className={cn(
+                              video.is_published === false && "text-muted-foreground"
+                            )}>
+                              {video.title}
+                            </span>
+                            {video.is_published === false && (
+                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                                Rascunho
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditVideo(video);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir vídeo</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir o vídeo "{video.title}"? 
+                                    Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteVideo(video.id)}
+                                    className="bg-destructive hover:bg-destructive/90"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2 text-sm text-muted-foreground">
+                            <p><strong>ID:</strong> {video.id}</p>
+                            <p><strong>Módulo:</strong> {moduleInfo?.title || video.module_id}</p>
+                            {courseInfo && (
+                              <p><strong>Curso:</strong> {courseInfo.title}</p>
+                            )}
+                            <p><strong>Duração:</strong> {video.duration}</p>
+                            <p><strong>Posição:</strong> {video.position}</p>
+                            {video.description && (
+                              <p><strong>Descrição:</strong> {video.description}</p>
+                            )}
+                            <p><strong>Status:</strong> {video.is_published === false ? "Rascunho" : "Publicado"}</p>
+                            <p><strong>Criado em:</strong> {new Date(video.created_at).toLocaleDateString('pt-BR')}</p>
+                            
+                            {video.thumbnail_url && (
+                              <div className="mt-4">
+                                <p><strong>Thumbnail:</strong></p>
+                                <img 
+                                  src={video.thumbnail_url} 
+                                  alt={video.title} 
+                                  className="mt-2 rounded-md max-w-full max-h-32 object-cover"
+                                />
+                              </div>
+                            )}
+                            
+                            <div className="mt-4">
+                              <p><strong>Vídeo:</strong></p>
+                              <a 
+                                href={video.video_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline break-all"
+                              >
+                                {video.video_url}
+                              </a>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default Admin;
