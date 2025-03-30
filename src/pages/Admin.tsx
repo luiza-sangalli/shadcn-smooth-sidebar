@@ -926,7 +926,7 @@ const Admin = () => {
                                     Esta ação não pode ser desfeita e todos os vídeos 
                                     associados serão excluídos.
                                   </AlertDialogDescription>
-                                </AlertDialogHeader>
+                              </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                   <AlertDialogAction
@@ -1043,3 +1043,4 @@ const Admin = () => {
                     />
                     
                     <FormField
+                      control={
