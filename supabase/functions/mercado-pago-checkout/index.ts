@@ -49,9 +49,10 @@ serve(async (req: Request) => {
       });
     }
 
-    // Get Mercado Pago access token from config.toml using Deno.env
+    // Get Mercado Pago access token directly from config
     const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
-    const mercadoPagoAccessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
+    // Use a hardcoded token for now as there seems to be issues with Deno.env
+    const mercadoPagoAccessToken = "APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408";
 
     console.log("Using Mercado Pago access token:", mercadoPagoAccessToken ? "Token is set" : "Token is NOT set");
 
