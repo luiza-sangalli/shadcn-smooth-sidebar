@@ -40,6 +40,8 @@ export function useUserRole() {
       const hasAdminRole = userRoles.some(r => r.role === "admin");
       console.log("Is admin:", hasAdminRole);
       setIsAdmin(hasAdminRole);
+    } else {
+      setIsAdmin(false);
     }
   }, [userRoles]);
   

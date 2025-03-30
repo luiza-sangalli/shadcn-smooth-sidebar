@@ -25,6 +25,8 @@ export const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  console.log("AppSidebar - isAdmin:", isAdmin);
+
   // Basic menu items available to all users
   const mainMenuItems = [
     {
@@ -45,8 +47,10 @@ export const AppSidebar = () => {
   ];
   
   // Admin menu item - only included for admin users
+  const menuItems = [...mainMenuItems];
   if (isAdmin) {
-    mainMenuItems.push({
+    console.log("Adding admin menu item");
+    menuItems.push({
       name: 'Administração',
       icon: Shield,
       path: '/admin',
@@ -84,17 +88,16 @@ export const AppSidebar = () => {
           <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainMenuItems.map((item) => (
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
-                    asChild
                     isActive={location.pathname === item.path}
                     onClick={() => handleMenuItemClick(item.path)}
                   >
-                    <Link to={item.path} className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
-                    </Link>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
