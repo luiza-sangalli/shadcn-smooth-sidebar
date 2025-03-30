@@ -28,7 +28,7 @@ export function useProfile() {
           console.log("Creating mock profile with user data:", user);
           const mockProfile: Profile = {
             id: user.id,
-            name: user.user_metadata?.name || user.name || "",
+            name: user.name || "",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             avatar_url: null,
@@ -59,7 +59,7 @@ export function useProfile() {
         const enhancedProfile: Profile = {
           ...data,
           email: user.email,
-          name: data.name || user.user_metadata?.name || user.name || ""
+          name: data.name || user.name || ""
         };
         
         setProfile(enhancedProfile);
