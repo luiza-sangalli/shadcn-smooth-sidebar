@@ -54,108 +54,13 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Definição do tipo para os cursos
-type Course = {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  progress: number;
-  level: string;
-  lastAccessed?: string;
-  category: string;
-  duration: string;
-  isArchived: boolean;
-  instructor: string;
-  totalLessons: number;
-  completedLessons: number;
-};
-
-// Mock de dados para cursos comprados
-const mockPurchasedCourses: Course[] = [
-  {
-    id: 1,
-    title: 'JavaScript Avançado',
-    description: 'Domine os conceitos avançados de JavaScript',
-    image: 'https://images.unsplash.com/photo-1552308995-2baac1ad5490?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    progress: 75,
-    level: 'Avançado',
-    lastAccessed: '2023-10-15',
-    category: 'Programação',
-    duration: '40 horas',
-    isArchived: false,
-    instructor: 'Ana Silva',
-    totalLessons: 24,
-    completedLessons: 18
-  },
-  {
-    id: 2,
-    title: 'Marketing Digital',
-    description: 'Estratégias para divulgar sua marca online',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    progress: 30,
-    level: 'Intermediário',
-    lastAccessed: '2023-10-10',
-    category: 'Marketing',
-    duration: '30 horas',
-    isArchived: false,
-    instructor: 'Carlos Mendes',
-    totalLessons: 18,
-    completedLessons: 5
-  },
-  {
-    id: 3,
-    title: 'Python para Data Science',
-    description: 'Análise de dados com Python e bibliotecas populares',
-    image: 'https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    progress: 50,
-    level: 'Intermediário',
-    lastAccessed: '2023-10-05',
-    category: 'Data Science',
-    duration: '45 horas',
-    isArchived: true,
-    instructor: 'Mariana Costa',
-    totalLessons: 30,
-    completedLessons: 15
-  },
-  {
-    id: 4,
-    title: 'Design UX/UI',
-    description: 'Princípios fundamentais de design de interfaces',
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    progress: 100,
-    level: 'Iniciante',
-    lastAccessed: '2023-09-28',
-    category: 'Design',
-    duration: '25 horas',
-    isArchived: false,
-    instructor: 'Roberto Alves',
-    totalLessons: 15,
-    completedLessons: 15
-  },
-  {
-    id: 5,
-    title: 'Desenvolvimento Mobile React Native',
-    description: 'Crie aplicativos nativos para iOS e Android',
-    image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    progress: 15,
-    level: 'Avançado',
-    lastAccessed: '2023-10-12',
-    category: 'Programação',
-    duration: '50 horas',
-    isArchived: false,
-    instructor: 'Juliana Teixeira',
-    totalLessons: 40,
-    completedLessons: 6
-  }
-];
+import { useEnrolledCourses, EnrolledCourse } from '@/hooks/useEnrolledCourses';
+import { Link } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MyCourses: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
   const [levelFilter, setLevelFilter] = useState<string | null>(null);
@@ -164,42 +69,46 @@ const MyCourses: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
+  const [filteredCourses, setFilteredCourses] = useState<EnrolledCourse[]>([]);
   const coursesPerPage = 8;
 
-  // Carregar cursos do mock
-  useEffect(() => {
-    setCourses(mockPurchasedCourses);
-  }, []);
+  // Load courses from the backend via the custom hook
+  const { enrolledCourses, loading, error } = useEnrolledCourses(showArchived);
 
-  // Filtrar, ordenar e paginar cursos
+  // Filter, sort, and paginate courses
   useEffect(() => {
-    let result = [...courses];
-
-    // Filtrar por estado arquivado
-    result = result.filter(course => course.isArchived === showArchived);
+    let result = [...enrolledCourses];
     
-    // Filtrar por nível
-    if (levelFilter) {
-      result = result.filter(course => course.level === levelFilter);
-    }
-    
-    // Filtrar por categoria
-    if (categoryFilter) {
-      result = result.filter(course => course.category === categoryFilter);
-    }
-    
-    // Filtrar por termo de busca
+    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         course => 
           course.title.toLowerCase().includes(query) || 
-          course.description.toLowerCase().includes(query) ||
+          (course.description && course.description.toLowerCase().includes(query)) ||
           course.instructor.toLowerCase().includes(query)
       );
     }
     
-    // Ordenar resultados
+    // Filter by level (currently level is not in the database schema, would need to be added)
+    if (levelFilter) {
+      result = result.filter(course => {
+        // This is a placeholder - in real implementation, level would be a property of the course
+        const courseLevel = getLevelFromCourse(course);
+        return courseLevel === levelFilter;
+      });
+    }
+    
+    // Filter by category (currently category is not in the database schema, would need to be added)
+    if (categoryFilter) {
+      result = result.filter(course => {
+        // This is a placeholder - in real implementation, category would be a property of the course
+        const courseCategory = getCategoryFromCourse(course);
+        return courseCategory === categoryFilter;
+      });
+    }
+    
+    // Sort results
     result.sort((a, b) => {
       if (sortBy === 'title') {
         return sortDirection === 'asc' 
@@ -210,7 +119,7 @@ const MyCourses: React.FC = () => {
           ? a.progress - b.progress
           : b.progress - a.progress;
       } else {
-        // Por data de último acesso
+        // By date of last access
         const dateA = a.lastAccessed ? new Date(a.lastAccessed) : new Date(0);
         const dateB = b.lastAccessed ? new Date(b.lastAccessed) : new Date(0);
         return sortDirection === 'asc'
@@ -220,39 +129,59 @@ const MyCourses: React.FC = () => {
     });
     
     setFilteredCourses(result);
-  }, [courses, searchQuery, showArchived, levelFilter, categoryFilter, sortBy, sortDirection]);
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [enrolledCourses, searchQuery, levelFilter, categoryFilter, sortBy, sortDirection]);
 
-  // Obter as categorias e níveis únicos para os filtros
-  const uniqueCategories = Array.from(new Set(courses.map(course => course.category)));
-  const uniqueLevels = Array.from(new Set(courses.map(course => course.level)));
+  // Helper function to get a level for a course (placeholder)
+  const getLevelFromCourse = (course: EnrolledCourse): string => {
+    // In a real implementation, this would read the level property
+    // For now, we'll derive a fake level based on the course properties
+    const progress = course.progress || 0;
+    if (progress < 30) return 'Iniciante';
+    if (progress < 70) return 'Intermediário';
+    return 'Avançado';
+  };
 
-  // Paginar os resultados
+  // Helper function to get a category for a course (placeholder)
+  const getCategoryFromCourse = (course: EnrolledCourse): string => {
+    // In a real implementation, this would read the category property
+    // For now, we'll derive a fake category based on the course title
+    const title = course.title.toLowerCase();
+    if (title.includes('javascript') || title.includes('react') || title.includes('program')) return 'Programação';
+    if (title.includes('marketing') || title.includes('negócio')) return 'Marketing';
+    if (title.includes('design') || title.includes('ui') || title.includes('ux')) return 'Design';
+    if (title.includes('data') || title.includes('análise') || title.includes('python')) return 'Data Science';
+    return 'Outros';
+  };
+
+  // Get unique categories and levels for filters
+  const uniqueCategories = Array.from(new Set(enrolledCourses.map(getCategoryFromCourse)));
+  const uniqueLevels = Array.from(new Set(enrolledCourses.map(getLevelFromCourse)));
+
+  // Paginate the results
   const indexOfLastCourse = currentPage * coursesPerPage;
   const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
   const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
   const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
 
-  // Manipular arquivamento do curso
-  const handleToggleArchive = (courseId: number) => {
-    setCourses(courses.map(course => 
-      course.id === courseId 
-        ? { ...course, isArchived: !course.isArchived } 
-        : course
-    ));
-    
-    const course = courses.find(c => c.id === courseId);
+  // Handle archive toggle
+  const handleToggleArchive = (courseId: string) => {
+    // In a real implementation, this would update the database
+    // For now, we'll just show a toast message
+    const course = enrolledCourses.find(c => c.id === courseId);
     if (course) {
       toast({
-        title: course.isArchived ? "Curso restaurado" : "Curso arquivado",
-        description: `${course.title} foi ${course.isArchived ? "restaurado" : "movido para arquivados"}.`,
+        title: showArchived ? "Curso restaurado" : "Curso arquivado",
+        description: `${course.title} foi ${showArchived ? "restaurado" : "movido para arquivados"}.`,
         duration: 3000,
       });
     }
   };
 
-  // Acessar conteúdo do curso
-  const handleAccessCourse = (courseId: number) => {
-    // Simulação de acesso ao curso
+  // Access course content
+  const handleAccessCourse = (courseId: string) => {
+    // Navigate to course detail page
     toast({
       title: "Acessando curso",
       description: "Você será redirecionado para o conteúdo do curso.",
@@ -260,7 +189,7 @@ const MyCourses: React.FC = () => {
     });
   };
 
-  // Limpar todos os filtros
+  // Clear all filters
   const handleClearFilters = () => {
     setSearchQuery('');
     setLevelFilter(null);
@@ -270,7 +199,7 @@ const MyCourses: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // Renderizar indicador de progresso
+  // Render progress indicator
   const renderProgress = (progress: number) => (
     <div className="relative pt-1">
       <div className="w-full bg-secondary h-2 rounded-full">
@@ -285,14 +214,57 @@ const MyCourses: React.FC = () => {
     </div>
   );
 
-  // Renderizar cursos como cards grid
+  // Render loading skeletons
+  const renderSkeletons = () => (
+    <div className={viewMode === 'grid' 
+      ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+      : ""
+    }>
+      {Array(4).fill(0).map((_, index) => (
+        viewMode === 'grid' ? (
+          <Card key={index} className="overflow-hidden">
+            <div className="aspect-video w-full">
+              <Skeleton className="h-full w-full" />
+            </div>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-2 w-full mb-4" />
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Skeleton className="h-10 w-full" />
+            </CardFooter>
+          </Card>
+        ) : (
+          <div key={index} className="border rounded-md p-4 mb-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-16 rounded" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+              <Skeleton className="h-8 w-24" />
+            </div>
+          </div>
+        )
+      ))}
+    </div>
+  );
+
+  // Render courses as grid cards
   const renderCoursesGrid = () => (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {currentCourses.map((course) => (
         <Card key={course.id} className="overflow-hidden flex flex-col h-full">
           <div className="aspect-video w-full overflow-hidden">
             <img 
-              src={course.image} 
+              src={course.thumbnail_url || "https://images.unsplash.com/photo-1552308995-2baac1ad5490?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"} 
               alt={course.title} 
               className="w-full h-full object-cover transition-transform hover:scale-105"
             />
@@ -300,16 +272,17 @@ const MyCourses: React.FC = () => {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{course.title}</CardTitle>
-              <Badge variant="outline">{course.level}</Badge>
+              <Badge variant="outline">{getLevelFromCourse(course)}</Badge>
             </div>
-            <CardDescription className="line-clamp-2">{course.description}</CardDescription>
+            <CardDescription className="line-clamp-2">{course.description || "Sem descrição disponível"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-grow">
             {renderProgress(course.progress)}
             <div className="flex justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {course.duration}
+                {/* Duration would need to be calculated from video durations */}
+                Aprox. {Math.round(course.totalLessons * 10)} min
               </span>
               <span className="flex items-center gap-1">
                 <BookOpen className="h-3 w-3" />
@@ -321,14 +294,17 @@ const MyCourses: React.FC = () => {
             <Button 
               className="flex-1" 
               onClick={() => handleAccessCourse(course.id)}
+              asChild
             >
-              {course.progress === 100 ? 'Revisar' : 'Continuar'}
+              <Link to={`/course/${course.id}`}>
+                {course.progress === 100 ? 'Revisar' : 'Continuar'}
+              </Link>
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={() => handleToggleArchive(course.id)}
-              title={course.isArchived ? "Restaurar curso" : "Arquivar curso"}
+              title={showArchived ? "Restaurar curso" : "Arquivar curso"}
             >
               <Archive className="h-4 w-4" />
             </Button>
@@ -338,7 +314,7 @@ const MyCourses: React.FC = () => {
     </div>
   );
 
-  // Renderizar cursos como tabela
+  // Render courses as table list
   const renderCoursesList = () => (
     <div className="rounded-md border">
       <Table>
@@ -359,14 +335,14 @@ const MyCourses: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-16 rounded overflow-hidden">
                     <img 
-                      src={course.image} 
+                      src={course.thumbnail_url || "https://images.unsplash.com/photo-1552308995-2baac1ad5490?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"} 
                       alt={course.title}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div>
                     <div className="font-semibold">{course.title}</div>
-                    <div className="text-xs text-muted-foreground">{course.level}</div>
+                    <div className="text-xs text-muted-foreground">{getLevelFromCourse(course)}</div>
                   </div>
                 </div>
               </TableCell>
@@ -374,22 +350,24 @@ const MyCourses: React.FC = () => {
                 <div className="w-32">{renderProgress(course.progress)}</div>
               </TableCell>
               <TableCell>{course.instructor}</TableCell>
-              <TableCell>{course.category}</TableCell>
+              <TableCell>{getCategoryFromCourse(course)}</TableCell>
               <TableCell>{course.lastAccessed || "Não acessado"}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleAccessCourse(course.id)}
+                    asChild
                   >
-                    {course.progress === 100 ? 'Revisar' : 'Continuar'}
+                    <Link to={`/course/${course.id}`}>
+                      {course.progress === 100 ? 'Revisar' : 'Continuar'}
+                    </Link>
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleToggleArchive(course.id)}
-                    title={course.isArchived ? "Restaurar curso" : "Arquivar curso"}
+                    title={showArchived ? "Restaurar curso" : "Arquivar curso"}
                   >
                     <Archive className="h-4 w-4" />
                   </Button>
@@ -402,7 +380,7 @@ const MyCourses: React.FC = () => {
     </div>
   );
 
-  // Renderizar mensagem de nenhum curso encontrado
+  // Render message when no courses found
   const renderNoCourses = () => (
     <Card className="p-6 text-center space-y-4">
       <div className="flex justify-center">
@@ -635,7 +613,9 @@ const MyCourses: React.FC = () => {
 
       {/* Lista de cursos */}
       <div className="space-y-6">
-        {filteredCourses.length > 0 ? (
+        {loading ? (
+          renderSkeletons()
+        ) : filteredCourses.length > 0 ? (
           <>
             {viewMode === 'grid' ? renderCoursesGrid() : renderCoursesList()}
             

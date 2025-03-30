@@ -42,3 +42,16 @@ export interface CourseWithContent extends Course {
 export interface ModuleWithVideos extends Module {
   videos?: Video[];
 }
+
+// New interfaces for enrolled courses
+export interface CourseWithProgress extends Course {
+  progress: number;
+  completedLessons: number;
+  totalLessons: number;
+  lastAccessed?: string;
+}
+
+export interface CourseWithEnrollment extends CourseWithProgress {
+  enrollment: Enrollment;
+  isArchived: boolean;
+}
