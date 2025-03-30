@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +23,6 @@ export const AppSidebar = () => {
   const { user, logout } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     console.log("AppSidebar - isAdmin:", isAdmin, "roleLoading:", roleLoading);
@@ -73,7 +72,9 @@ export const AppSidebar = () => {
   // Handle menu item click
   const handleMenuItemClick = (path: string) => {
     console.log("Navigating to:", path);
-    // Force a hard navigation to ensure the route is properly processed
+    
+    // Use window.location.href to force a complete page refresh and proper state reset
+    // This ensures that all components re-initialize with current permissions
     window.location.href = path;
   };
 
