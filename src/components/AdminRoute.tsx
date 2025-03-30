@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -11,32 +11,55 @@ interface AdminRouteProps {
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isAdmin, isLoading: roleLoading, refetch } = useUserRole();
+  const { 
+    isAdmin, 
+    isDefinitelyNotAdmin,
+    isAdminStatusLoading, 
+    refetch 
+  } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [hasCheckedAdmin, setHasCheckedAdmin] = useState(false);
   
-  const isLoading = authLoading || roleLoading;
-
-  // Force refetch roles when this component mounts
+  const isLoading = authLoading || isAdminStatusLoading;
+  
+  // Force refetch when component mounts and when location changes
   useEffect(() => {
-    refetch();
-  }, [refetch]);
-
-  // Handle authentication and authorization
+    console.log("AdminRoute - Fetching fresh admin status on mount/route change");
+    refetch().then(() => {
+      setHasCheckedAdmin(true);
+    });
+  }, [refetch, location.pathname]);
+  
+  // Retry logic if needed
   useEffect(() => {
-    // Log the current state for debugging
+    if (attemptCount > 0 && attemptCount < 3 && !isAdmin && !isDefinitelyNotAdmin) {
+      const timer = setTimeout(() => {
+        console.log(`AdminRoute - Retry attempt ${attemptCount}/3`);
+        refetch();
+        setAttemptCount(prev => prev + 1);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [attemptCount, isAdmin, isDefinitelyNotAdmin, refetch]);
+
+  // Handle authentication and authorization with clear action flow
+  useEffect(() => {
+    if (isLoading || !hasCheckedAdmin) {
+      // Still loading or hasn't done initial check yet
+      return;
+    }
+
     console.log("AdminRoute - Current state:", { 
       isAuthenticated, 
       isAdmin,
+      isDefinitelyNotAdmin,
+      hasCheckedAdmin,
       isLoading,
       path: location.pathname
     });
     
-    if (isLoading) {
-      // Still loading, don't make any decisions yet
-      return;
-    }
-
     // First check authentication
     if (!isAuthenticated) {
       console.log("User is not authenticated, redirecting to login");
@@ -49,20 +72,36 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       return;
     }
 
-    // Then check admin status (only after loading is complete)
-    if (!isAdmin) {
-      console.log("User is not an admin, redirecting to dashboard");
+    // Then check admin status (after loading is complete and admin check done)
+    if (isDefinitelyNotAdmin) {
+      console.log("User is definitely not an admin, redirecting to dashboard");
       toast({
         title: "Acesso restrito",
         description: "Você não tem permissão para acessar a área administrativa.",
         variant: "destructive",
       });
       navigate("/dashboard", { replace: true });
+      return;
     }
-  }, [isAuthenticated, isAdmin, isLoading, navigate, location.pathname]);
+    
+    // If we still don't know admin status after checks, try one more time
+    if (!isAdmin && attemptCount === 0) {
+      console.log("AdminRoute - Initial admin check inconclusive, retrying");
+      setAttemptCount(1);
+    }
+  }, [
+    isAuthenticated, 
+    isAdmin, 
+    isDefinitelyNotAdmin,
+    isLoading, 
+    hasCheckedAdmin,
+    navigate, 
+    location.pathname, 
+    attemptCount
+  ]);
 
-  // Show loading state while checking permissions
-  if (isLoading) {
+  // Show a loading state while checking permissions
+  if (isLoading || !hasCheckedAdmin || (!isAdmin && !isDefinitelyNotAdmin && attemptCount < 3)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -72,7 +111,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   // Show loading while redirecting
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAuthenticated || isDefinitelyNotAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>

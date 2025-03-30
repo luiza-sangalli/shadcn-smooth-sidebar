@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -26,6 +26,7 @@ export const AppSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<Array<{name: string, icon: any, path: string}>>([]);
+  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
 
   // Basic menu items available to all users
   const mainMenuItems = [
@@ -48,14 +49,20 @@ export const AppSidebar = () => {
 
   // Force a refetch when component mounts or route changes
   useEffect(() => {
-    refetch();
+    console.log("AppSidebar - Fetching admin status on mount/route change");
+    refetch().then(() => {
+      setAdminCheckComplete(true);
+    });
   }, [refetch, location.pathname]);
 
   // Update menu items when isAdmin changes
   useEffect(() => {
+    if (!adminCheckComplete) return;
+    
     console.log("AppSidebar - Admin status:", {
       isAdmin,
-      path: location.pathname
+      path: location.pathname,
+      adminCheckComplete
     });
     
     // Start with main menu items
@@ -72,7 +79,7 @@ export const AppSidebar = () => {
     }
     
     setMenuItems(updatedMenuItems);
-  }, [isAdmin, location.pathname]);
+  }, [isAdmin, location.pathname, adminCheckComplete]);
 
   // Helper function to get user initial or fallback
   const getUserInitial = () => {
@@ -85,8 +92,8 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click
-  const handleMenuItemClick = (path: string) => {
+  // Handle menu item click with special admin route handling
+  const handleMenuItemClick = useCallback((path: string) => {
     console.log("Handling click for path:", path);
     
     // Special handling for admin route
@@ -104,14 +111,16 @@ export const AppSidebar = () => {
           return;
         }
         
-        navigate('/admin');
+        // Navigate to admin and force a full page reload to ensure proper state
+        // This helps synchronize the admin status across components
+        window.location.href = '/admin';
       });
       return;
     }
     
     // Use navigate for other paths
     navigate(path);
-  };
+  }, [navigate, refetch]);
 
   return (
     <Sidebar>
