@@ -36,7 +36,18 @@ export function useProfile() {
             email: user.email,
             whatsapp: "(11) 99999-9999",
             documentType: "cpf",
-            documentNumber: "123.456.789-00"
+            documentNumber: "123.456.789-00",
+            socialName: "",
+            companyName: "",
+            address: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            document_type: "cpf",
+            document_number: "123.456.789-00",
+            company_name: "",
+            social_name: "",
+            zip_code: ""
           };
           
           setProfile(mockProfile);
@@ -62,7 +73,18 @@ export function useProfile() {
             email: user.email,
             whatsapp: "",
             documentType: "cpf",
-            documentNumber: ""
+            documentNumber: "",
+            socialName: "",
+            companyName: "",
+            address: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            document_type: "cpf",
+            document_number: "",
+            company_name: "",
+            social_name: "",
+            zip_code: ""
           };
           
           setProfile(mockProfile);
@@ -91,7 +113,7 @@ export function useProfile() {
           email: user.email,
           name: data.name || user?.name || user?.email?.split('@')[0] || "",
           // Map database columns to profile properties
-          documentType: data.document_type,
+          documentType: data.document_type as 'cpf' | 'cnpj',
           documentNumber: data.document_number,
           socialName: data.social_name,
           companyName: data.company_name,
@@ -114,7 +136,18 @@ export function useProfile() {
             email: user.email,
             whatsapp: "",
             documentType: "cpf",
-            documentNumber: ""
+            documentNumber: "",
+            socialName: "",
+            companyName: "",
+            address: "",
+            city: "",
+            state: "",
+            zipCode: "",
+            document_type: "cpf",
+            document_number: "",
+            company_name: "",
+            social_name: "",
+            zip_code: ""
           };
           
           setProfile(fallbackProfile);

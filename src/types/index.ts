@@ -32,11 +32,11 @@ export interface Video extends VideoRow {
 export interface Profile extends ProfileRow {
   // Add any additional frontend-specific properties
   email?: string;
-  socialName?: string;
-  whatsapp?: string;
   documentType?: 'cpf' | 'cnpj';
   documentNumber?: string;
+  socialName?: string;
   companyName?: string;
+  whatsapp?: string;
   address?: string;
   city?: string;
   state?: string;
