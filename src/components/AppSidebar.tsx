@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -18,15 +18,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Home, LogOut, BookOpen, User, Shield } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
   const { isAdmin, isLoading: roleLoading } = useUserRole();
   const location = useLocation();
-
-  useEffect(() => {
-    console.log("AppSidebar - isAdmin:", isAdmin, "roleLoading:", roleLoading);
-  }, [isAdmin, roleLoading]);
+  const [menuItems, setMenuItems] = useState<Array<{name: string, icon: any, path: string}>>([]);
 
   // Basic menu items available to all users
   const mainMenuItems = [
@@ -46,17 +44,26 @@ export const AppSidebar = () => {
       path: '/my-account',
     },
   ];
-  
-  // Create the menu items array with admin item conditionally added
-  const menuItems = [...mainMenuItems];
-  if (isAdmin) {
-    console.log("Adding admin menu item");
-    menuItems.push({
-      name: 'Administração',
-      icon: Shield,
-      path: '/admin',
-    });
-  }
+
+  // Update menu items when isAdmin changes
+  useEffect(() => {
+    console.log("AppSidebar - isAdmin:", isAdmin, "roleLoading:", roleLoading);
+    
+    // Start with main menu items
+    const updatedMenuItems = [...mainMenuItems];
+    
+    // Add admin item if user is admin
+    if (isAdmin) {
+      console.log("Adding admin menu item");
+      updatedMenuItems.push({
+        name: 'Administração',
+        icon: Shield,
+        path: '/admin',
+      });
+    }
+    
+    setMenuItems(updatedMenuItems);
+  }, [isAdmin, roleLoading]);
 
   // Helper function to get user initial or fallback
   const getUserInitial = () => {
@@ -69,12 +76,30 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click
+  // Handle menu item click with delayed navigation for admin route
   const handleMenuItemClick = (path: string) => {
-    console.log("Navigating to:", path);
+    console.log("Handling click for path:", path);
     
-    // Use window.location.href to force a complete page refresh and proper state reset
-    // This ensures that all components re-initialize with current permissions
+    // Special handling for admin route to ensure permissions are checked
+    if (path === '/admin') {
+      if (!isAdmin) {
+        toast({
+          title: "Acesso restrito",
+          description: "Você não tem permissão para acessar esta página.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Use a slight delay to ensure all state is synced
+      toast({
+        title: "Acessando área administrativa",
+        description: "Redirecionando para o painel administrativo...",
+      });
+    }
+    
+    // Use window.location.href for a full page refresh
+    console.log("Navigating to:", path);
     window.location.href = path;
   };
 
