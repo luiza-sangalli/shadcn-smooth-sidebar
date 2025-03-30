@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { Home, LayoutDashboard, LogOut, BookOpen, User } from 'lucide-react';
+import { Home, LayoutDashboard, LogOut, BookOpen, User, Shield } from 'lucide-react';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
@@ -37,6 +37,11 @@ export const AppSidebar = () => {
       name: 'Minha Conta',
       icon: User,
       path: '/my-account',
+    },
+    {
+      name: 'Administração',
+      icon: Shield,
+      path: '/admin',
     },
   ];
 
