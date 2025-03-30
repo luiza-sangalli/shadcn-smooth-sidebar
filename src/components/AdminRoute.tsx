@@ -28,12 +28,13 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     });
   }, [isAuthenticated, isAdmin, isLoading, authLoading, roleLoading, hasCheckedPermissions]);
 
-  // Only check permissions when loading is complete
+  // Only perform permission check once loading is complete
   useEffect(() => {
     if (isLoading) {
       return; // Wait until we're done loading
     }
 
+    // First check authentication
     if (!isAuthenticated) {
       console.log("User is not authenticated, redirecting to login");
       toast({
@@ -45,7 +46,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       return;
     }
 
-    if (!isAdmin) {
+    // Then check admin status - only do this after admin status has been definitively determined
+    if (isAdmin === false) {
       console.log("User is not an admin, redirecting to dashboard");
       toast({
         title: "Acesso restrito",

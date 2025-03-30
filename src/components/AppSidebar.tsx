@@ -97,8 +97,8 @@ export const AppSidebar = () => {
         description: "Redirecionando para o painel administrativo...",
       });
       
-      // Use navigate for admin path to avoid page refresh
-      navigate('/admin');
+      // Force a full page reload to ensure all components re-initialize with correct state
+      window.location.href = '/admin';
       return;
     }
     
