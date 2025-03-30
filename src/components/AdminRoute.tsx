@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "@/components/ui/use-toast";
@@ -11,30 +11,35 @@ interface AdminRouteProps {
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isAdmin, isLoading: roleLoading } = useUserRole();
+  const { isAdmin, isDefinitelyAdmin, isLoading: roleLoading, refetch } = useUserRole();
   const navigate = useNavigate();
-  const [hasCheckedPermissions, setHasCheckedPermissions] = useState(false);
+  const location = useLocation();
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   
   const isLoading = authLoading || roleLoading;
 
   useEffect(() => {
-    console.log("AdminRoute - Auth status:", { 
-      isAuthenticated, 
-      isAdmin, 
-      isLoading,
-      authLoading,
-      roleLoading,
-      hasCheckedPermissions
-    });
-  }, [isAuthenticated, isAdmin, isLoading, authLoading, roleLoading, hasCheckedPermissions]);
+    // Force a refetch when component mounts to ensure fresh data
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Only perform permission check once loading is complete
   useEffect(() => {
+    // Log the current state for debugging
+    console.log("AdminRoute - Current state:", { 
+      isAuthenticated, 
+      isAdmin,
+      isDefinitelyAdmin, 
+      isLoading,
+      path: location.pathname
+    });
+    
     if (isLoading) {
-      return; // Wait until we're done loading
+      // Still loading, don't make any decisions yet
+      return;
     }
 
-    // First check authentication
+    // Auth check first
     if (!isAuthenticated) {
       console.log("User is not authenticated, redirecting to login");
       toast({
@@ -46,22 +51,20 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       return;
     }
 
-    // Then check admin status - only do this after admin status has been definitively determined
-    if (isAdmin === false) {
-      console.log("User is not an admin, redirecting to dashboard");
+    // Then admin check - only do this after status is definitively determined
+    if (isDefinitelyAdmin) {
+      console.log("User confirmed as admin, allowing access");
+      setIsAuthorized(true);
+    } else if (!isAdmin) {
+      console.log("User is definitely not an admin, redirecting to dashboard");
       toast({
         title: "Acesso restrito",
         description: "Você não tem permissão para acessar a área administrativa.",
         variant: "destructive",
       });
       navigate("/dashboard", { replace: true });
-      return;
     }
-
-    // If we get here, user is authenticated and is an admin
-    console.log("User is authenticated and is an admin, allowing access");
-    setHasCheckedPermissions(true);
-  }, [isAuthenticated, isAdmin, isLoading, navigate]);
+  }, [isAuthenticated, isAdmin, isDefinitelyAdmin, isLoading, navigate, location.pathname]);
 
   // Show loading state while checking permissions
   if (isLoading) {
@@ -73,17 +76,17 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  // Only render children if we've confirmed the user has admin permissions
-  if (hasCheckedPermissions && isAuthenticated && isAdmin) {
+  // Only render children if user is explicitly authorized
+  if (isAuthorized) {
     console.log("Rendering admin page content");
     return <>{children}</>;
   }
 
-  // Show loading while redirecting
+  // Show loading while redirecting or still deciding
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-      <p className="ml-2 text-sm text-muted-foreground">Redirecionando...</p>
+      <p className="ml-2 text-sm text-muted-foreground">Verificando acesso administrativo...</p>
     </div>
   );
 };

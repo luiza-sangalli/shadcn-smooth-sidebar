@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,9 +7,9 @@ export type UserRole = "admin" | "user";
 
 export function useUserRole() {
   const { user, isAuthenticated } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   
-  const { data: userRoles, isLoading } = useQuery({
+  const { data: userRoles, isLoading, refetch } = useQuery({
     queryKey: ["user-roles", user?.id],
     queryFn: async () => {
       if (!isAuthenticated || !user?.id) {
@@ -35,7 +34,7 @@ export function useUserRole() {
     },
     enabled: !!user?.id && isAuthenticated,
     refetchOnWindowFocus: false,
-    staleTime: 60000, // 1 minute
+    staleTime: 30000, // 30 seconds
   });
   
   useEffect(() => {
@@ -43,12 +42,20 @@ export function useUserRole() {
       const hasAdminRole = userRoles.some(r => r.role === "admin");
       console.log("Is admin determined:", hasAdminRole, "User roles:", userRoles);
       setIsAdmin(hasAdminRole);
+    } else if (isLoading) {
+      // Keep as null while loading
+      setIsAdmin(null);
+    } else {
+      // If not loading and no roles, definitely not admin
+      setIsAdmin(false);
     }
   }, [userRoles, isLoading]);
   
   return {
-    isAdmin,
+    isAdmin: isAdmin === null ? false : isAdmin, // Default to false if null
+    isDefinitelyAdmin: isAdmin === true, // Only true when we know for sure
     userRoles,
     isLoading,
+    refetch
   };
 }

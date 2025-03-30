@@ -22,7 +22,7 @@ import { toast } from '@/components/ui/use-toast';
 
 export const AppSidebar = () => {
   const { user, logout } = useAuth();
-  const { isAdmin, isLoading: roleLoading } = useUserRole();
+  const { isDefinitelyAdmin, isLoading: roleLoading, refetch } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<Array<{name: string, icon: any, path: string}>>([]);
@@ -46,16 +46,26 @@ export const AppSidebar = () => {
     },
   ];
 
-  // Update menu items when isAdmin changes
+  // Force a refetch when component mounts or route changes
   useEffect(() => {
-    console.log("AppSidebar - isAdmin:", isAdmin, "roleLoading:", roleLoading);
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // Update menu items when isDefinitelyAdmin changes
+  useEffect(() => {
+    console.log("AppSidebar - Admin status:", {
+      isDefinitelyAdmin,
+      roleLoading,
+      path: location.pathname
+    });
     
     // Start with main menu items
     const updatedMenuItems = [...mainMenuItems];
     
-    // Add admin item if user is admin
-    if (isAdmin) {
-      console.log("Adding admin menu item");
+    // Add admin item if user is definitely admin
+    if (isDefinitelyAdmin) {
+      console.log("Adding admin menu item - user is confirmed admin");
       updatedMenuItems.push({
         name: 'Administração',
         icon: Shield,
@@ -64,7 +74,7 @@ export const AppSidebar = () => {
     }
     
     setMenuItems(updatedMenuItems);
-  }, [isAdmin, roleLoading]);
+  }, [isDefinitelyAdmin, roleLoading, location.pathname]);
 
   // Helper function to get user initial or fallback
   const getUserInitial = () => {
@@ -77,28 +87,32 @@ export const AppSidebar = () => {
     return 'U';
   };
 
-  // Handle menu item click with careful admin route handling
+  // Handle menu item click
   const handleMenuItemClick = (path: string) => {
     console.log("Handling click for path:", path);
     
     // Special handling for admin route
     if (path === '/admin') {
-      if (!isAdmin) {
+      refetch().then(({ data }) => {
+        const hasAdminRole = data?.some(r => r.role === "admin");
+        
+        if (!hasAdminRole) {
+          toast({
+            title: "Acesso restrito",
+            description: "Você não tem permissão para acessar esta página.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
         toast({
-          title: "Acesso restrito",
-          description: "Você não tem permissão para acessar esta página.",
-          variant: "destructive",
+          title: "Acessando área administrativa",
+          description: "Redirecionando para o painel administrativo...",
         });
-        return;
-      }
-      
-      toast({
-        title: "Acessando área administrativa",
-        description: "Redirecionando para o painel administrativo...",
+        
+        // Force navigation to admin page with a hard reload
+        window.location.href = '/admin';
       });
-      
-      // Force a full page reload to ensure all components re-initialize with correct state
-      window.location.href = '/admin';
       return;
     }
     
