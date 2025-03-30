@@ -5,38 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useCourses } from '@/hooks/useCourses';
+import { Course } from '@/types';
 
-// Mock data for courses
-const availableCourses = [
-  {
-    id: 1,
-    title: 'Desenvolvimento Web Completo',
-    description: 'Aprenda HTML, CSS, JavaScript, React, Node e mais!',
-    price: 'R$ 199,90',
-    level: 'Iniciante',
-    duration: '40 horas',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
-  },
-  {
-    id: 2,
-    title: 'Python para Data Science',
-    description: 'Domine Python, Pandas, NumPy e visualização de dados',
-    price: 'R$ 249,90',
-    level: 'Intermediário',
-    duration: '35 horas',
-    image: 'https://images.unsplash.com/photo-1526379879527-8559ecfcaec0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
-  },
-  {
-    id: 3,
-    title: 'UX/UI Design',
-    description: 'Crie interfaces incríveis e melhore a experiência do usuário',
-    price: 'R$ 179,90',
-    level: 'Todos os níveis',
-    duration: '25 horas',
-    image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
-  },
-];
-
+// Mock data for enrolled courses - this will be replaced with real data later
 const enrolledCourses = [
   {
     id: 4,
@@ -58,6 +30,15 @@ const enrolledCourses = [
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { courses, loading, error } = useCourses();
+
+  // Helper function to determine course level based on price or other factors
+  const getCourseLevel = (course: Course): string => {
+    const price = Number(course.price);
+    if (price <= 100) return 'Iniciante';
+    if (price <= 200) return 'Intermediário';
+    return 'Avançado';
+  };
 
   return (
     <div className="space-y-8">
@@ -117,44 +98,58 @@ const Dashboard = () => {
       {/* Available Courses */}
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Cursos Disponíveis</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {availableCourses.map((course) => (
-            <Card key={course.id} className="overflow-hidden flex flex-col">
-              <div className="aspect-video w-full overflow-hidden">
-                <img 
-                  src={course.image} 
-                  alt={course.title} 
-                  className="w-full h-full object-cover transition-transform hover:scale-105"
-                />
-              </div>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{course.title}</CardTitle>
-                  <Badge variant="outline">{course.level}</Badge>
+        {loading ? (
+          <div className="flex justify-center p-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+          </div>
+        ) : error ? (
+          <Card className="p-6 text-center">
+            <p className="text-muted-foreground">Erro ao carregar cursos. Tente novamente mais tarde.</p>
+          </Card>
+        ) : courses.length === 0 ? (
+          <Card className="p-6 text-center">
+            <p className="text-muted-foreground">Nenhum curso disponível no momento.</p>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => (
+              <Card key={course.id} className="overflow-hidden flex flex-col">
+                <div className="aspect-video w-full overflow-hidden">
+                  <img 
+                    src={course.thumbnail_url || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'} 
+                    alt={course.title} 
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                  />
                 </div>
-                <CardDescription>{course.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Duração:</span>
-                  <span className="text-sm font-medium">{course.duration}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Preço:</span>
-                  <span className="text-sm font-bold text-primary">{course.price}</span>
-                </div>
-              </CardContent>
-              <CardFooter className="mt-auto grid grid-cols-2 gap-4">
-                <Button variant="outline" asChild>
-                  <Link to={`/course/${course.id}`}>Saber Mais</Link>
-                </Button>
-                <Button asChild>
-                  <Link to={`/course/${course.id}`}>Comprar Curso</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{course.title}</CardTitle>
+                    <Badge variant="outline">{getCourseLevel(course)}</Badge>
+                  </div>
+                  <CardDescription>{course.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Instrutor:</span>
+                    <span className="text-sm font-medium">{course.instructor}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Preço:</span>
+                    <span className="text-sm font-bold text-primary">R$ {Number(course.price).toFixed(2)}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="mt-auto grid grid-cols-2 gap-4">
+                  <Button variant="outline" asChild>
+                    <Link to={`/course/${course.id}`}>Saber Mais</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to={`/course/${course.id}`}>Comprar Curso</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,229 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      courses: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          instructor: string
+          price: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructor: string
+          price?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          instructor?: string
+          price?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      enrollments: {
+        Row: {
+          course_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrollments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          id: string
+          position: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      progress: {
+        Row: {
+          completed: boolean
+          id: string
+          last_watched_at: string
+          user_id: string
+          video_id: string
+          watched_seconds: number
+        }
+        Insert: {
+          completed?: boolean
+          id?: string
+          last_watched_at?: string
+          user_id: string
+          video_id: string
+          watched_seconds?: number
+        }
+        Update: {
+          completed?: boolean
+          id?: string
+          last_watched_at?: string
+          user_id?: string
+          video_id?: string
+          watched_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration: string
+          id: string
+          module_id: string
+          position: number
+          published_at: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration: string
+          id?: string
+          module_id: string
+          position?: number
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration?: string
+          id?: string
+          module_id?: string
+          position?: number
+          published_at?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
