@@ -24,6 +24,16 @@ export interface Video extends VideoRow {
 
 export interface Profile extends ProfileRow {
   // Add any additional frontend-specific properties
+  email?: string;
+  socialName?: string;
+  whatsapp?: string;
+  documentType?: 'cpf' | 'cnpj';
+  documentNumber?: string;
+  companyName?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 
 export interface Enrollment extends EnrollmentRow {

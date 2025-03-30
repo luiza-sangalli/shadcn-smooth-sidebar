@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 import { 
   Form, 
   FormControl, 
@@ -44,7 +45,8 @@ import {
   Building2, 
   Phone, 
   Mail, 
-  Info 
+  Info,
+  Loader2 
 } from "lucide-react";
 
 const personalInfoSchema = z.object({
@@ -71,14 +73,15 @@ const invoiceSchema = z.object({
 const MyAccount = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { profile, loading, updateProfile } = useProfile();
   const [documentType, setDocumentType] = useState<"cpf" | "cnpj">("cpf");
 
   const personalForm = useForm<z.infer<typeof personalInfoSchema>>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      fullName: user?.name || "",
+      fullName: "",
       socialName: "",
-      email: user?.email || "",
+      email: "",
       whatsapp: "",
     },
   });
@@ -96,23 +99,69 @@ const MyAccount = () => {
     },
   });
 
-  const onPersonalSubmit = (values: z.infer<typeof personalInfoSchema>) => {
-    toast({
-      title: "Informações pessoais atualizadas",
-      description: "Seus dados pessoais foram atualizados com sucesso.",
+  // Update forms when profile data is loaded
+  useEffect(() => {
+    if (profile) {
+      personalForm.reset({
+        fullName: profile.name || "",
+        socialName: profile.socialName || "",
+        email: profile.email || "",
+        whatsapp: profile.whatsapp || "",
+      });
+
+      if (profile.documentType) {
+        setDocumentType(profile.documentType);
+      }
+
+      invoiceForm.reset({
+        documentType: profile.documentType || "cpf",
+        documentNumber: profile.documentNumber || "",
+        companyName: profile.companyName || "",
+        address: profile.address || "",
+        city: profile.city || "",
+        state: profile.state || "",
+        zipCode: profile.zipCode || "",
+      });
+    }
+  }, [profile, personalForm, invoiceForm]);
+
+  const onPersonalSubmit = async (values: z.infer<typeof personalInfoSchema>) => {
+    await updateProfile({
+      name: values.fullName,
+      socialName: values.socialName,
+      whatsapp: values.whatsapp,
     });
-    console.log(values);
   };
 
-  const onInvoiceSubmit = (values: z.infer<typeof invoiceSchema>) => {
+  const onInvoiceSubmit = async (values: z.infer<typeof invoiceSchema>) => {
+    await updateProfile({
+      documentType: values.documentType,
+      documentNumber: values.documentNumber,
+      companyName: values.companyName,
+      address: values.address,
+      city: values.city,
+      state: values.state,
+      zipCode: values.zipCode,
+    });
+    
     toast({
       title: "Informações fiscais atualizadas",
       description: "Seus dados fiscais foram atualizados com sucesso.",
     });
-    console.log(values);
   };
 
   const watchDocumentType = invoiceForm.watch("documentType");
+
+  if (loading) {
+    return (
+      <div className="container max-w-5xl py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Carregando informações do perfil...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-5xl py-8">
@@ -186,7 +235,7 @@ const MyAccount = () => {
                           <FormControl>
                             <div className="flex items-center gap-2">
                               <Mail className="h-4 w-4 text-muted-foreground" />
-                              <Input placeholder="seu@email.com" {...field} />
+                              <Input placeholder="seu@email.com" {...field} disabled />
                             </div>
                           </FormControl>
                           <FormMessage />
