@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.37.0";
-import { MercadoPagoConfig, Preference } from "https://esm.sh/mercadopago@2.3.0";
 
 // Configure CORS headers
 const corsHeaders = {
@@ -104,42 +103,53 @@ serve(async (req: Request) => {
 
     console.log("Creating preference for user:", user.email);
 
-    // Create the preference in Mercado Pago using the SDK
+    // Create the preference directly using the Mercado Pago API
     try {
-      // Initialize the SDK with the access token
-      const client = new MercadoPagoConfig({ 
-        accessToken: mercadoPagoAccessToken 
+      // Create preference via direct API call instead of using the SDK
+      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${mercadoPagoAccessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: courseId,
+              title: courseTitle,
+              description: `Acesso ao curso: ${courseTitle}`,
+              quantity: 1,
+              currency_id: 'BRL',
+              unit_price: Number(coursePrice)
+            }
+          ],
+          payer: {
+            email: user.email
+          },
+          back_urls: {
+            success: `${backUrl}/dashboard?status=approved&course_id=${courseId}`,
+            failure: `${backUrl}/course/${courseId}?status=rejected`,
+            pending: `${backUrl}/course/${courseId}?status=pending`
+          },
+          auto_return: 'approved',
+          external_reference: `${user.id}|${courseId}`,
+          notification_url: `${backUrl}/api/mercado-pago-webhook` // This will be implemented later
+        })
       });
-      
-      // Create a new preference instance
-      const preference = new Preference(client);
-      
-      // Create the preference with the required information
-      const preferenceData = {
-        items: [
-          {
-            id: courseId,
-            title: courseTitle,
-            description: `Acesso ao curso: ${courseTitle}`,
-            quantity: 1,
-            currency_id: 'BRL',
-            unit_price: Number(coursePrice)
-          }
-        ],
-        payer: {
-          email: user.email
-        },
-        back_urls: {
-          success: `${backUrl}/dashboard?status=approved&course_id=${courseId}`,
-          failure: `${backUrl}/course/${courseId}?status=rejected`,
-          pending: `${backUrl}/course/${courseId}?status=pending`
-        },
-        auto_return: 'approved',
-        external_reference: `${user.id}|${courseId}`,
-        notification_url: `${backUrl}/api/mercado-pago-webhook` // This will be implemented later
-      };
-      
-      const result = await preference.create({ body: preferenceData });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response from Mercado Pago:', response.status, JSON.stringify(errorData));
+        return new Response(JSON.stringify({ 
+          error: 'Failed to create payment preference',
+          details: errorData
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: response.status,
+        });
+      }
+
+      const result = await response.json();
       console.log("Preference created successfully:", result.id);
 
       return new Response(JSON.stringify({ 
