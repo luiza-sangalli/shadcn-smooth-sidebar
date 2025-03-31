@@ -28,13 +28,14 @@ export function usePurchaseCourse() {
 
       console.log("Iniciando pagamento para curso:", courseId, courseTitle, coursePrice);
 
-      // Call the Mercado Pago Edge Function
+      // Call the Mercado Pago Edge Function with the user ID
       const { data, error } = await supabase.functions.invoke('mercado-pago-checkout', {
         body: { 
           courseId, 
           courseTitle, 
           coursePrice,
-          backUrl 
+          backUrl,
+          userId: user.id // Pass the user ID directly from the context
         },
       });
 

@@ -38,11 +38,11 @@ serve(async (req: Request) => {
     }
 
     // Get the request body
-    const { courseId, courseTitle, coursePrice, backUrl } = await req.json();
+    const { courseId, courseTitle, coursePrice, backUrl, userId } = await req.json();
 
     // Validate required fields
-    if (!courseId || !courseTitle || !coursePrice) {
-      console.error("Missing required fields:", { courseId, courseTitle, coursePrice });
+    if (!courseId || !courseTitle || !coursePrice || !userId) {
+      console.error("Missing required fields:", { courseId, courseTitle, coursePrice, userId });
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
@@ -60,48 +60,7 @@ serve(async (req: Request) => {
     }
 
     console.log("Using Mercado Pago access token:", mercadoPagoAccessToken.substring(0, 10) + "...");
-
-    // Get authorization from request
-    const authorization = req.headers.get('Authorization');
-    if (!authorization) {
-      console.error('No authorization header provided');
-      return new Response(JSON.stringify({ error: 'No authorization header' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
-    }
-
-    // Get JWT token from authorization header (Bearer token)
-    const token = authorization.replace('Bearer ', '');
-
-    // Create Supabase client with the user's JWT
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Supabase configuration missing');
-      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-
-    // Get the user information
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.error('Error getting user:', userError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      });
-    }
-
-    console.log("Creating preference for user:", user.email);
+    console.log("Creating preference for user ID:", userId);
 
     // Create the preference using the Mercado Pago API since SDK is not compatible with Deno
     try {
@@ -124,7 +83,7 @@ serve(async (req: Request) => {
             }
           ],
           payer: {
-            email: user.email
+            id: userId
           },
           back_urls: {
             success: `${backUrl}/dashboard?status=approved&course_id=${courseId}`,
@@ -132,7 +91,7 @@ serve(async (req: Request) => {
             pending: `${backUrl}/course/${courseId}?status=pending`
           },
           auto_return: 'approved',
-          external_reference: `${user.id}|${courseId}`,
+          external_reference: `${userId}|${courseId}`,
           notification_url: `${backUrl}/api/mercado-pago-webhook`
         })
       });
