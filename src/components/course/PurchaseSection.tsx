@@ -30,7 +30,6 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
 
   // Initialize Mercado Pago SDK with the public key
   React.useEffect(() => {
-    // Initialize with the public key
     initMercadoPago('APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5');
   }, []);
 
@@ -44,12 +43,13 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
       ) : (
         <>
           {preferenceId ? (
+            // Using Checkout Pro with Wallet component
             <Wallet 
               initialization={{ preferenceId: preferenceId }}
-              customization={{ 
-                texts: { 
-                  action: "buy", 
-                  valueProp: "practicality" 
+              customization={{
+                texts: {
+                  action: "buy",
+                  valueProp: "practicality"
                 }
               }}
             />

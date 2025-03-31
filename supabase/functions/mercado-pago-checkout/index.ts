@@ -133,7 +133,7 @@ serve(async (req: Request) => {
           },
           auto_return: 'approved',
           external_reference: `${user.id}|${courseId}`,
-          notification_url: `${backUrl}/api/mercado-pago-webhook` // This will be implemented later
+          notification_url: `${backUrl}/api/mercado-pago-webhook`
         })
       });
 
