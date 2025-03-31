@@ -148,21 +148,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      // Verificar primeiro se o usuário está autenticado para evitar erros
+      if (!user) {
+        // Se não há usuário autenticado, apenas redirecione e limpe o estado
+        setUser(null);
+        setSession(null);
+        navigate("/login", { replace: true });
+        return;
+      }
+      
+      // Tente fazer o logout
       const { error } = await supabase.auth.signOut();
+      
+      // Se houver erro com a sessão, ainda limpe o estado local e redirecione
+      if (error && error.message.includes("Auth session missing")) {
+        console.warn("Sessão ausente durante logout, limpando estado local:", error.message);
+        setUser(null);
+        setSession(null);
+        navigate("/login", { replace: true });
+        return;
+      }
+      
+      // Para outros erros, lance uma exceção
       if (error) throw error;
       
       toast({
         title: "Sessão encerrada",
       });
       
-      navigate("/login");
+      // Limpeza explícita dos estados
+      setUser(null);
+      setSession(null);
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao sair:", error);
+      // Mesmo com erro, ainda tente limpar o estado e redirecionar
+      setUser(null);
+      setSession(null);
+      
       toast({
         title: "Erro ao encerrar sessão",
         description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
         variant: "destructive",
       });
+      
+      // Ainda redirecione para a página de login
+      navigate("/login", { replace: true });
     }
   };
 
