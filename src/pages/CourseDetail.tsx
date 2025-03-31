@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,9 +21,7 @@ const CourseDetail: React.FC = () => {
   
   // Initialize Mercado Pago SDK
   useEffect(() => {
-    initMercadoPago('APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408', {
-      locale: 'pt-BR'
-    });
+    initMercadoPago('APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408');
   }, []);
 
   // Handling loading state
