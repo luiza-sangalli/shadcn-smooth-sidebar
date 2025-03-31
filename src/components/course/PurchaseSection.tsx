@@ -44,12 +44,14 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
         <>
           {preferenceId ? (
             <div className="mt-4">
-              {/* Container div for Mercado Pago Wallet */}
-              <div id="wallet_container"></div>
-              
               <Wallet 
-                initialization={{ preferenceId: preferenceId }} 
-                customization={{ texts: { action: "buy", valueProp: "practicality" } }}
+                initialization={{ preferenceId: preferenceId }}
+                customization={{ 
+                  texts: { 
+                    action: "buy", 
+                    valueProp: "practicality" 
+                  }
+                }}
               />
             </div>
           ) : (
