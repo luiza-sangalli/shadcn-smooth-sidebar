@@ -19,9 +19,9 @@ const CourseDetail: React.FC = () => {
   const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
   const { user } = useAuth();
   
-  // Initialize Mercado Pago SDK
+  // Initialize Mercado Pago SDK with the new public key
   useEffect(() => {
-    initMercadoPago('APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408');
+    initMercadoPago('APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5');
   }, []);
 
   // Handling loading state

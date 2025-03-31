@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.37.0";
 
@@ -49,9 +48,9 @@ serve(async (req: Request) => {
       });
     }
 
-    // Hardcoded token as a constant - no more env variable issues
+    // Hardcoded token as a constant - updated with new access token
     const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
-    const mercadoPagoAccessToken = "APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408";
+    const mercadoPagoAccessToken = "APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5";
 
     console.log("Using Mercado Pago access token:", mercadoPagoAccessToken.substring(0, 10) + "...");
 
