@@ -90,7 +90,7 @@ serve(async (req: Request) => {
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Get the user information - MODIFIED LINE: removed token parameter
+    // Get the user information
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -103,9 +103,9 @@ serve(async (req: Request) => {
 
     console.log("Creating preference for user:", user.email);
 
-    // Create the preference directly using the Mercado Pago API
+    // Create the preference using the Mercado Pago API since SDK is not compatible with Deno
     try {
-      // Create preference via direct API call instead of using the SDK
+      // Create preference via direct API call because SDK has compatibility issues with Deno
       const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
         method: 'POST',
         headers: {

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Play, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -29,12 +29,13 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
   const { user } = useAuth();
 
   // Initialize Mercado Pago SDK with the public key
-  useEffect(() => {
+  React.useEffect(() => {
+    // Initialize with the public key
     initMercadoPago('APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5');
   }, []);
 
   return (
-    <div>
+    <div className="mt-4">
       {isEnrolled ? (
         <Button className="w-full md:w-auto">
           <Play className="mr-2 h-4 w-4" />
@@ -43,17 +44,15 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
       ) : (
         <>
           {preferenceId ? (
-            <div className="mt-4">
-              <Wallet 
-                initialization={{ preferenceId: preferenceId }}
-                customization={{ 
-                  texts: { 
-                    action: "buy", 
-                    valueProp: "practicality" 
-                  }
-                }}
-              />
-            </div>
+            <Wallet 
+              initialization={{ preferenceId: preferenceId }}
+              customization={{ 
+                texts: { 
+                  action: "buy", 
+                  valueProp: "practicality" 
+                }
+              }}
+            />
           ) : (
             <Button 
               className="w-full md:w-auto" 
