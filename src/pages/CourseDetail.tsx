@@ -2,7 +2,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useCourseContent } from "@/hooks/useCourseContent";
-import { usePurchaseCourse } from "@/hooks/usePurchaseCourse";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCourseLevel } from "@/hooks/useCourseLevel";
 import { CourseInfo } from "@/components/course/CourseInfo";
@@ -15,7 +14,6 @@ import { CourseLoadingSkeleton } from "@/components/course/CourseLoadingSkeleton
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { course, loading, error } = useCourseContent(courseId);
-  const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
   const { user } = useAuth();
   
   // Use course level calculation with default price of 0 if course is not loaded yet
@@ -38,18 +36,6 @@ const CourseDetail: React.FC = () => {
   const completedVideos = 0; // This will come from progress tracking
   const progress = totalVideos > 0 ? (completedVideos / totalVideos) * 100 : 0;
   
-  const handlePurchaseCourse = async () => {
-    if (!user) {
-      return;
-    }
-
-    await purchaseCourse(
-      course.id,
-      course.title,
-      Number(course.price)
-    );
-  };
-  
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <div className="grid md:grid-cols-3 gap-8">
@@ -68,9 +54,6 @@ const CourseDetail: React.FC = () => {
             courseId={course.id}
             courseTitle={course.title}
             coursePrice={Number(course.price)}
-            isLoading={isLoading}
-            preferenceId={preferenceId}
-            onPurchase={handlePurchaseCourse}
           />
         </div>
 

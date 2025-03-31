@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, BookOpen } from "lucide-react";
+import { Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePurchaseCourse } from "@/hooks/usePurchaseCourse";
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 interface PurchaseSectionProps {
@@ -11,9 +12,6 @@ interface PurchaseSectionProps {
   courseId: string;
   courseTitle: string;
   coursePrice: number;
-  isLoading: boolean;
-  preferenceId: string | null;
-  onPurchase: () => Promise<void>;
 }
 
 export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
@@ -21,17 +19,39 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
   courseId,
   courseTitle,
   coursePrice,
-  isLoading,
-  preferenceId,
-  onPurchase,
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
 
   // Initialize Mercado Pago SDK with the public key
-  React.useEffect(() => {
+  useEffect(() => {
     initMercadoPago('APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5');
   }, []);
+
+  // Create preference ID on component mount
+  useEffect(() => {
+    if (user && courseId && !isEnrolled && !preferenceId) {
+      handlePurchaseCourse();
+    }
+  }, [user, courseId, isEnrolled]);
+
+  const handlePurchaseCourse = async () => {
+    if (!user) {
+      toast({
+        title: "Aviso",
+        description: "Você precisa estar logado para comprar este curso.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await purchaseCourse(
+      courseId,
+      courseTitle,
+      Number(coursePrice)
+    );
+  };
 
   return (
     <div className="mt-4">
@@ -43,7 +63,7 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
       ) : (
         <>
           {preferenceId ? (
-            // Using Checkout Pro with Wallet component
+            // Show Mercado Pago Wallet button directly
             <Wallet 
               initialization={{ preferenceId: preferenceId }}
               customization={{
@@ -54,14 +74,10 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
               }}
             />
           ) : (
-            <Button 
-              className="w-full md:w-auto" 
-              onClick={onPurchase}
-              disabled={isLoading}
-            >
-              <BookOpen className="mr-2 h-4 w-4" />
-              {isLoading ? 'Processando...' : `Comprar Curso por R$ ${Number(coursePrice).toFixed(2)}`}
-            </Button>
+            // Show loading state while creating preference
+            <div className="py-2">
+              {isLoading ? 'Carregando opções de pagamento...' : 'Aguarde...'}
+            </div>
           )}
         </>
       )}
