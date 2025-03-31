@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,14 +11,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePurchaseCourse } from "@/hooks/usePurchaseCourse";
 import { useAuth } from "@/contexts/AuthContext";
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { course, loading, error } = useCourseContent(courseId);
   const { toast } = useToast();
-  const { purchaseCourse, isLoading } = usePurchaseCourse();
+  const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
   const { user } = useAuth();
   
+  // Initialize Mercado Pago SDK
+  useEffect(() => {
+    initMercadoPago('APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408', {
+      locale: 'pt-BR'
+    });
+  }, []);
+
   // Handling loading state
   if (loading) {
     return (
@@ -86,16 +94,11 @@ const CourseDetail: React.FC = () => {
       return;
     }
 
-    const checkoutUrl = await purchaseCourse(
+    await purchaseCourse(
       course.id,
       course.title,
       Number(course.price)
     );
-    
-    if (checkoutUrl) {
-      // Redirect to Mercado Pago checkout
-      window.location.href = checkoutUrl;
-    }
   };
   
   return (
@@ -139,14 +142,25 @@ const CourseDetail: React.FC = () => {
                 Continuar Assistindo
               </Button>
             ) : (
-              <Button 
-                className="w-full md:w-auto" 
-                onClick={handlePurchaseCourse}
-                disabled={isLoading}
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                {isLoading ? 'Processando...' : `Comprar Curso por R$ ${Number(course.price).toFixed(2)}`}
-              </Button>
+              <>
+                {preferenceId ? (
+                  <div className="mt-4">
+                    <Wallet 
+                      initialization={{ preferenceId: preferenceId }} 
+                      customization={{ texts: { action: 'Pagar', valueProp: 'Valor do curso' } }}
+                    />
+                  </div>
+                ) : (
+                  <Button 
+                    className="w-full md:w-auto" 
+                    onClick={handlePurchaseCourse}
+                    disabled={isLoading}
+                  >
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    {isLoading ? 'Processando...' : `Comprar Curso por R$ ${Number(course.price).toFixed(2)}`}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>

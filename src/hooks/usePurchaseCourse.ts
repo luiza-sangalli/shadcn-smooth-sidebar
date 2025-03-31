@@ -6,6 +6,7 @@ import { useToast } from './use-toast';
 
 export function usePurchaseCourse() {
   const [isLoading, setIsLoading] = useState(false);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -50,7 +51,7 @@ export function usePurchaseCourse() {
       // Log the response for debugging
       console.log("Resposta do servidor de pagamento:", data);
       
-      if (!data || !data.initPoint) {
+      if (!data || !data.preferenceId) {
         console.error('Invalid response from payment server:', data);
         toast({
           title: "Erro",
@@ -60,7 +61,10 @@ export function usePurchaseCourse() {
         return null;
       }
       
-      return data.initPoint;
+      // Store the preference ID for the Mercado Pago checkout
+      setPreferenceId(data.preferenceId);
+      
+      return data.preferenceId;
     } catch (error) {
       console.error('Error purchasing course:', error);
       toast({
@@ -77,5 +81,6 @@ export function usePurchaseCourse() {
   return {
     purchaseCourse,
     isLoading,
+    preferenceId,
   };
 }
