@@ -6,31 +6,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCourses } from '@/hooks/useCourses';
+import { useEnrolledCourses } from '@/hooks/useEnrolledCourses';
 import { Course } from '@/types';
-
-// Mock data for enrolled courses - this will be replaced with real data later
-const enrolledCourses = [
-  {
-    id: "4",
-    title: 'JavaScript Avançado',
-    description: 'Domine os conceitos avançados de JavaScript',
-    progress: 75,
-    level: 'Avançado',
-    image: 'https://images.unsplash.com/photo-1552308995-2baac1ad5490?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
-  },
-  {
-    id: "5",
-    title: 'Marketing Digital',
-    description: 'Estratégias para divulgar sua marca online',
-    progress: 30,
-    level: 'Intermediário',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'
-  },
-];
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { courses, loading, error } = useCourses();
+  const { enrolledCourses, loading: enrolledLoading, error: enrolledError } = useEnrolledCourses();
 
   // Helper function to determine course level based on price or other factors
   const getCourseLevel = (course: Course): string => {
@@ -52,13 +34,21 @@ const Dashboard = () => {
       {/* Enrolled Courses */}
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Continue Aprendendo</h2>
-        {enrolledCourses.length > 0 ? (
+        {enrolledLoading ? (
+          <div className="flex justify-center p-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+          </div>
+        ) : enrolledError ? (
+          <Card className="p-6 text-center">
+            <p className="text-muted-foreground">Erro ao carregar seus cursos. Tente novamente mais tarde.</p>
+          </Card>
+        ) : enrolledCourses.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {enrolledCourses.map((course) => (
               <Card key={course.id} className="overflow-hidden flex flex-col">
                 <div className="aspect-video w-full overflow-hidden">
                   <img 
-                    src={course.image} 
+                    src={course.thumbnail_url || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80'} 
                     alt={course.title} 
                     className="w-full h-full object-cover transition-transform hover:scale-105"
                   />
@@ -66,7 +56,7 @@ const Dashboard = () => {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg">{course.title}</CardTitle>
-                    <Badge variant="outline">{course.level}</Badge>
+                    <Badge variant="outline">{getCourseLevel(course)}</Badge>
                   </div>
                   <CardDescription>{course.description}</CardDescription>
                 </CardHeader>
@@ -90,7 +80,9 @@ const Dashboard = () => {
         ) : (
           <Card className="p-6 text-center">
             <p className="text-muted-foreground">Você ainda não está inscrito em nenhum curso.</p>
-            <Button className="mt-4">Explorar Cursos</Button>
+            <Button className="mt-4" asChild>
+              <Link to="/my-courses">Explorar Cursos</Link>
+            </Button>
           </Card>
         )}
       </div>
