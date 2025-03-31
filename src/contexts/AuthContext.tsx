@@ -160,7 +160,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Tente fazer o logout
       const { error } = await supabase.auth.signOut();
       
-      // Se houver erro com a sessão, ainda limpe o estado local e redirecione
+      // Se houver erro com a sessão, silenciosamente limpe o estado local e redirecione
+      // sem mostrar mensagem de erro ao usuário
       if (error && error.message.includes("Auth session missing")) {
         console.warn("Sessão ausente durante logout, limpando estado local:", error.message);
         setUser(null);
@@ -169,7 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      // Para outros erros, lance uma exceção
+      // Para outros erros reais, lance uma exceção
       if (error) throw error;
       
       toast({
@@ -182,15 +183,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Erro ao sair:", error);
-      // Mesmo com erro, ainda tente limpar o estado e redirecionar
+      
+      // Limpeza dos estados independente de erro
       setUser(null);
       setSession(null);
       
-      toast({
-        title: "Erro ao encerrar sessão",
-        description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
-        variant: "destructive",
-      });
+      // Apenas mostre o toast de erro para erros que não sejam relacionados a sessão ausente
+      // para evitar mostrar erros desnecessários ao usuário
+      if (!(error instanceof Error) || !error.message.includes("Auth session missing")) {
+        toast({
+          title: "Erro ao encerrar sessão",
+          description: error instanceof Error ? error.message : "Ocorreu um erro desconhecido",
+          variant: "destructive",
+        });
+      }
       
       // Ainda redirecione para a página de login
       navigate("/login", { replace: true });
