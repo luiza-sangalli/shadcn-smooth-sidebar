@@ -87,9 +87,9 @@ const Dashboard = () => {
         )}
       </div>
       
-      {/* Available Courses */}
+      {/* Available Courses - Now renamed to "Recommended for you" */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Cursos Disponíveis</h2>
+        <h2 className="text-2xl font-semibold">Recomendados para você</h2>
         {loading ? (
           <div className="flex justify-center p-12">
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
