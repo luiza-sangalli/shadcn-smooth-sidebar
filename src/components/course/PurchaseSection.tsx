@@ -63,13 +63,24 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
       ) : (
         <>
           {preferenceId ? (
-            // Show Mercado Pago Wallet button directly
+            // Customized Mercado Pago Wallet button 
             <Wallet 
               initialization={{ preferenceId: preferenceId }}
               customization={{
                 texts: {
-                  action: "buy",
-                  valueProp: "practicality"
+                  action: "buy", // Opções: "pay", "buy"
+                  valueProp: "security" // Opções: "security", "speed", "practicality" 
+                },
+                visual: {
+                  buttonBackground: "default", // "default", "black", "blue", "white"
+                  borderRadius: "6px",
+                  buttonHeight: "48px", // altura do botão
+                  buttonPadding: "16px", // padding do botão
+                  valuePropColor: "primary" // cor da prop de valor: "primary", "black", "white"
+                },
+                theme: {
+                  headerColor: "#004bad",
+                  elementsColor: "#004bad"
                 }
               }}
             />
