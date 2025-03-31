@@ -69,14 +69,14 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
               customization={{
                 texts: {
                   action: "buy", // Opções: "pay", "buy"
-                  valueProp: "security" // Opções: "security", "speed", "practicality" 
+                  valueProp: "security_safety" // Corrigido: usando valor válido do tipo
                 },
                 visual: {
                   buttonBackground: "default", // "default", "black", "blue", "white"
                   borderRadius: "6px",
                   buttonHeight: "48px", // altura do botão
                   buttonPadding: "16px", // padding do botão
-                  valuePropColor: "primary" // cor da prop de valor: "primary", "black", "white"
+                  valuePropColor: "grey" // Corrigido: usando valor válido do tipo
                 },
                 theme: {
                   headerColor: "#004bad",
