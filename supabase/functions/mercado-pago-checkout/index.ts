@@ -19,6 +19,9 @@ const handleCors = (req: Request) => {
   }
 };
 
+// Mercado Pago seller email (the one that owns the access token)
+const SELLER_EMAIL = "luiza@nuvia.co"; // Replace with the actual seller email
+
 serve(async (req: Request) => {
   console.log("Edge function received request:", req.method, req.url);
   
@@ -96,6 +99,18 @@ serve(async (req: Request) => {
     }
 
     console.log("Creating preference for user:", user.email);
+
+    // Check if user email matches the seller email
+    if (user.email?.toLowerCase() === SELLER_EMAIL.toLowerCase()) {
+      console.error('User email matches seller email:', user.email);
+      return new Response(JSON.stringify({ 
+        error: 'self_payment_not_allowed',
+        message: 'Não é possível pagar para você mesmo. Use outra conta para fazer o pagamento.'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
 
     // Create the preference in Mercado Pago
     try {
