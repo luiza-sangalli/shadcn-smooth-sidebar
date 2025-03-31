@@ -75,7 +75,6 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
                   buttonBackground: "default", // "default", "black", "blue", "white"
                   borderRadius: "6px",
                   buttonHeight: "48px", // altura do botão
-                  buttonPadding: "16px", // padding do botão
                   valuePropColor: "grey" // Corrigido: usando valor válido do tipo
                 },
                 theme: {
