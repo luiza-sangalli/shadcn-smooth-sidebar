@@ -90,8 +90,8 @@ serve(async (req: Request) => {
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
 
-    // Get the user information
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    // Get the user information - MODIFIED LINE: removed token parameter
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
       console.error('Error getting user:', userError);
