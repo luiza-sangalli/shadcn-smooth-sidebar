@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.37.0";
 
@@ -48,9 +49,15 @@ serve(async (req: Request) => {
       });
     }
 
-    // Hardcoded token as a constant - updated with new access token
-    const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
-    const mercadoPagoAccessToken = "APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5";
+    // Get Mercado Pago access token from environment variables
+    const mercadoPagoAccessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
+    if (!mercadoPagoAccessToken) {
+      console.error("MERCADO_PAGO_ACCESS_TOKEN environment variable not set");
+      return new Response(JSON.stringify({ error: 'Payment provider configuration missing' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
 
     console.log("Using Mercado Pago access token:", mercadoPagoAccessToken.substring(0, 10) + "...");
 
@@ -98,6 +105,7 @@ serve(async (req: Request) => {
 
     // Create the preference in Mercado Pago
     try {
+      const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
       const response = await fetch(mercadoPagoUrl, {
         method: 'POST',
         headers: {
