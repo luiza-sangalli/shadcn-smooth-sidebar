@@ -34,7 +34,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        console.log("Auth state changed:", event, newSession?.user?.id);
+        // Remover logs com dados sensíveis
+        console.log("Auth state changed:", event, newSession?.user?.id ? "Usuário autenticado" : "Usuário não autenticado");
         setSession(newSession);
         
         // Set user with name from user_metadata if available
@@ -48,8 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         }
         
-        // If we have a new session and the event is SIGNED_IN, show success message
-        if (newSession && event === 'SIGNED_IN') {
+        // Remover o toast de sessão iniciada para evitar notificações indesejadas
+        // Mostrar toast apenas para login explícito, não para sessões recuperadas
+        if (newSession && event === 'SIGNED_IN' && !document.referrer.includes(window.location.host)) {
           toast({
             title: "Sessão iniciada",
             description: `Bem-vindo, ${newSession.user.email}!`,
@@ -60,7 +62,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("Checking existing session:", currentSession?.user?.id);
+      // Remover logs com dados sensíveis
+      console.log("Verificando sessão existente:", currentSession?.user?.id ? "Usuário autenticado" : "Usuário não autenticado");
       setSession(currentSession);
       
       // Set user with name from user_metadata if available
