@@ -50,16 +50,6 @@ export function usePurchaseCourse() {
       // Log the response for debugging
       console.log("Resposta do servidor de pagamento:", data);
       
-      // Handle specific error case: cannot pay yourself
-      if (data?.error === 'self_payment_not_allowed') {
-        toast({
-          title: "Pagamento não permitido",
-          description: data.message || "Não é possível comprar seu próprio curso. Use outra conta para fazer o pagamento.",
-          variant: "destructive",
-        });
-        return null;
-      }
-      
       if (!data || !data.initPoint) {
         console.error('Invalid response from payment server:', data);
         toast({
