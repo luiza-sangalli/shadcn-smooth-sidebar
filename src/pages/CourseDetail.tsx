@@ -18,6 +18,10 @@ const CourseDetail: React.FC = () => {
   const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
   const { user } = useAuth();
   
+  // Use course level calculation with default price of 0 if course is not loaded yet
+  // This ensures the hook is always called in the same order
+  const courseLevel = useCourseLevel(course ? Number(course.price) : 0);
+  
   // Handling loading state
   if (loading) {
     return <CourseLoadingSkeleton />;
@@ -34,9 +38,6 @@ const CourseDetail: React.FC = () => {
   const completedVideos = 0; // This will come from progress tracking
   const progress = totalVideos > 0 ? (completedVideos / totalVideos) * 100 : 0;
   
-  // Get course level
-  const courseLevel = useCourseLevel(Number(course.price));
-
   const handlePurchaseCourse = async () => {
     if (!user) {
       return;
