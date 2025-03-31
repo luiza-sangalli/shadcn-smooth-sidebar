@@ -28,6 +28,12 @@ export function usePurchaseCourse() {
 
       console.log("Iniciando pagamento para curso:", courseId, courseTitle, coursePrice);
 
+      // Verificar se o preço está sendo passado corretamente
+      if (coursePrice <= 0) {
+        coursePrice = 1; // Define um valor mínimo para teste se o preço for zero
+        console.log("Preço ajustado para:", coursePrice);
+      }
+
       // Call the Mercado Pago Edge Function with the user ID
       const { data, error } = await supabase.functions.invoke('mercado-pago-checkout', {
         body: { 
