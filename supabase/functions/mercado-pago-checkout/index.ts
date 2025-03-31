@@ -49,20 +49,11 @@ serve(async (req: Request) => {
       });
     }
 
-    // Get Mercado Pago access token directly from config
+    // Hardcoded token as a constant - no more env variable issues
     const mercadoPagoUrl = 'https://api.mercadopago.com/checkout/preferences';
-    // Use a hardcoded token for now as there seems to be issues with Deno.env
     const mercadoPagoAccessToken = "APP_USR-32762554381075-033019-8416f2b58418b2c3734fd4d23fce4bf8-328884408";
 
-    console.log("Using Mercado Pago access token:", mercadoPagoAccessToken ? "Token is set" : "Token is NOT set");
-
-    if (!mercadoPagoAccessToken) {
-      console.error('MERCADO_PAGO_ACCESS_TOKEN not configured or empty');
-      return new Response(JSON.stringify({ error: 'Payment provider not configured' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      });
-    }
+    console.log("Using Mercado Pago access token:", mercadoPagoAccessToken.substring(0, 10) + "...");
 
     // Get authorization from request
     const authorization = req.headers.get('Authorization');
