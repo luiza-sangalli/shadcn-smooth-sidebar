@@ -147,7 +147,7 @@ const CourseDetail: React.FC = () => {
                   <div className="mt-4">
                     <Wallet 
                       initialization={{ preferenceId: preferenceId }} 
-                      customization={{ texts: { action: 'Pagar', valueProp: 'Valor do curso' } }}
+                      customization={{ texts: { action: "buy", valueProp: "practicality" } }}
                     />
                   </div>
                 ) : (
