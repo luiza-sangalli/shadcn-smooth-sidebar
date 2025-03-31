@@ -1,11 +1,10 @@
 
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import { Play, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePurchaseCourse } from "@/hooks/usePurchaseCourse";
-import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 interface PurchaseSectionProps {
   isEnrolled: boolean;
@@ -22,16 +21,11 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { purchaseCourse, isLoading, preferenceId } = usePurchaseCourse();
+  const { purchaseCourse, isLoading, checkoutUrl } = usePurchaseCourse();
 
-  // Initialize Mercado Pago SDK with the public key
+  // Create checkout URL on component mount
   useEffect(() => {
-    initMercadoPago('APP_USR-df416c28-3161-41c8-b118-11f6464dd3d5');
-  }, []);
-
-  // Create preference ID on component mount
-  useEffect(() => {
-    if (user && courseId && !isEnrolled && !preferenceId) {
+    if (user && courseId && !isEnrolled && !checkoutUrl) {
       handlePurchaseCourse();
     }
   }, [user, courseId, isEnrolled]);
@@ -62,25 +56,17 @@ export const PurchaseSection: React.FC<PurchaseSectionProps> = ({
         </Button>
       ) : (
         <>
-          {preferenceId ? (
-            // Customized Mercado Pago Wallet button 
-            <Wallet 
-              initialization={{ preferenceId: preferenceId }}
-              customization={{
-                texts: {
-                  action: "buy", // Opções: "pay", "buy"
-                  valueProp: "security_safety" // Usando valor válido do tipo
-                },
-                visual: {
-                  buttonBackground: "default", // "default", "black", "blue", "white"
-                  borderRadius: "6px",
-                  buttonHeight: "48px", // altura do botão
-                  valuePropColor: "grey" // Usando valor válido do tipo
-                }
-              }}
-            />
+          {checkoutUrl ? (
+            // Botão para redirecionar para o Checkout Pro
+            <Button 
+              className="w-full md:w-auto bg-blue-600 hover:bg-blue-700" 
+              onClick={() => window.open(checkoutUrl, '_blank')}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Comprar com Mercado Pago
+            </Button>
           ) : (
-            // Show loading state while creating preference
+            // Mostrar estado de loading enquanto cria checkout
             <div className="py-2">
               {isLoading ? 'Carregando opções de pagamento...' : 'Aguarde...'}
             </div>
